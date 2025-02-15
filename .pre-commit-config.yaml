@@ -1,0 +1,50 @@
+---
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: check-added-large-files
+  - id: check-executables-have-shebangs
+  - id: check-case-conflict
+  - id: check-vcs-permalinks
+  - id: forbid-new-submodules
+  - id: mixed-line-ending
+  - id: check-merge-conflict
+  - id: detect-private-key
+  - id: detect-aws-credentials
+    args: ['--allow-missing-credentials']  # Avoid failure on CI
+  - id: check-toml
+  - id: check-yaml
+  - id: check-json
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: v0.10.0.1
+  hooks:
+  - id: shellcheck
+    name: Shellcheck
+    args: ["-f", "gcc"]  # output filename:linenum:colnum (clickable)
+- repo: https://github.com/AleksaC/hadolint-py
+  rev: v2.12.1b3
+  hooks:
+  - id: hadolint
+    name: Hadolint (Dockerfile checker)
+# Actual Python Linters
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.7.0
+  hooks:
+  - id: ruff-format
+  - id: ruff
+    args: ["--fix"]
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.12.1
+  hooks:
+  - id: mypy
+    name: Mypy (Python type-checker)
+    exclude: 'docs/source/.*\.py'
+    # Uncomment below if mypy requires extra type stub packages
+    # additional_dependencies: [types-PyYAML==6.0.12.2]
+- repo: https://github.com/igorshubovych/markdownlint-cli
+  rev: v0.42.0
+  hooks:
+  - id: markdownlint-fix

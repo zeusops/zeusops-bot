@@ -1,0 +1,81 @@
+[tool.poetry]
+name = "zeusops_bot"
+description = "Multipurpose discord bot for the Zeusops community"
+authors = ["Jb Doyon <jb@jiby.tech>"]
+readme = "README.md"
+version = "0.1.0"
+
+
+[tool.poetry.scripts]
+zeusops-bot = "zeusops_bot.cli:cli"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "7.*"
+# Test coverage
+pytest-cov = "4.*"
+# Clearer assertion failures (colorful diff)
+pytest-clarity = "1.*"
+
+
+[tool.poetry.group.docs.dependencies]
+# Main documentation-as-code (HTML/PDF generator)
+Sphinx = "*"
+# Read the docs (pretty) theme for sphinx
+sphinx-rtd-theme = "1.*"
+# Markdown parser for sphinx: Sphinx uses "RST" files, this adds markdown
+myst-parser = "*"
+# Automatic Python module docs (javadoc-style)
+sphinx-autodoc2 = "*"
+# Generate Dash/Zeal "docsets" (offline dev-docs package) from HTML docs
+doc2dash = "*"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.pytest.ini_options]
+addopts = """-vv \
+      --doctest-modules \
+      --cov=zeusops_bot \
+      --cov-report=xml:test_results/coverage.xml \
+      --cov-report=html:test_results/coverage.html \
+      --cov-report=term \
+      --junit-xml=test_results/results.xml"""
+
+[tool.coverage.run]
+omit = [
+  "src/zeusops_bot/tests/**",
+  "tests/**",
+]
+
+[tool.ruff]
+# Always fix what you can, without needing CLI flags
+fix = true
+line-length = 88  # Like black
+extend-exclude = ["docs/*"]
+
+[tool.ruff.lint]
+unfixable = [
+    "ERA", # do not autoremove commented out code
+]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+# Add I = isort (import sorter), to remove need for isort itself
+# And D = pydocstyle for docstrings
+select = ["E", "F", "I", "D"]
+# D400/D415 = First line (of dosctrings) should end with [.?!]
+extend-ignore = ["D400", "D415"]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+# Use Google-style docstrings
+pydocstyle = {convention = "google"}
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true

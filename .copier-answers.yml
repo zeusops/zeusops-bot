@@ -1,0 +1,11 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v1.8.0
+_src_path: gh:OverkillGuy/python-template
+author_email: jb@jiby.tech
+author_name: Jb Doyon
+description: Multipurpose discord bot for the Zeusops community
+dynamic_versioning: false
+package_name: zeusops_bot
+project_name: Zeusops bot
+project_slug: zeusops-bot
+python_version: '3.12'
