@@ -2,6 +2,10 @@
 
 import argparse
 import sys
+from pathlib import Path
+
+from zeusops_bot import command
+from zeusops_bot.models import ModDetail
 
 
 def parse_arguments(args: list[str]) -> argparse.Namespace:
@@ -19,7 +23,11 @@ def parse_arguments(args: list[str]) -> argparse.Namespace:
         "zeusops-bot",
         description="Multipurpose discord bot for the Zeusops community",
     )
-    parser.add_argument("foo", help="Some parameter")
+    parser.add_argument("base_config_path", help="The path to base config file")
+    parser.add_argument("target_folder", help="The path where to store loaded configs")
+    parser.add_argument("mods", help="JSON string of modlist to load")
+    parser.add_argument("scenario_id", help="Scenario ID to load")
+    parser.add_argument("config_file_name", help="Name under which to save config")
     return parser.parse_args(args)
 
 
@@ -28,9 +36,25 @@ def cli(arguments: list[str] | None = None):
     if arguments is None:
         arguments = sys.argv[1:]
     args = parse_arguments(arguments)
-    main(args.foo)
+    main(
+        Path(args.base_config),
+        Path(args.target_folder),
+        args.mods,
+        args.scenario_id,
+        args.config_file_name,
+    )
 
 
-def main(foo):
+def main(
+    base_config_file: Path,
+    target_folder: Path,
+    modlist: list[ModDetail],
+    scenario_id: str,
+    filename: str,
+):
     """Run the program's main command"""
-    print(f"Foo is: {foo}")
+    conf_generator = command.ReforgerConfigGenerator(base_config_file, target_folder)
+    print(f"Loading {len(modlist)} mods, for {scenario_id=}...")
+    out_path = conf_generator.zeus_upload(modlist, scenario_id, filename)
+    print(f"Saved under file {out_path.name}")
+    return 0
