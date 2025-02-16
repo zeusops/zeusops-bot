@@ -11,6 +11,8 @@ zeusops-bot = "zeusops_bot.cli:cli"
 
 [tool.poetry.dependencies]
 python = "^3.12"
+# JSON patching (modifying files)
+jsonpatch = "*"
 
 
 [tool.poetry.group.test.dependencies]

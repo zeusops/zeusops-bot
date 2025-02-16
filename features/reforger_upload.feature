@@ -12,6 +12,7 @@ Scenario: Upload next mission
   When Zeus calls "/zeus-upload"
   And Zeus specifies <modlist.json>, <scenarioId>, <filename>
   Then a new server config file is created
+  And the config file is patched with <modlist.json> and <scenarioId>
 
 Scenario: Load mission from previous upload
   Given a Zeusops mission was uploaded already under <filename>
