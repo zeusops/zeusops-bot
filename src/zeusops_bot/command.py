@@ -8,6 +8,13 @@ import jsonpatch
 from zeusops_bot import errors
 from zeusops_bot.models import ModDetail
 
+SYMLINK_FILENAME = "current-config.json"
+
+
+def as_config_file(target_dest: Path, filename: str) -> Path:
+    """Expands the config file path to absolute"""
+    return (target_dest / filename).with_suffix(".json")
+
 
 class ReforgerConfigGenerator:
     """Manages Arma Reforger config.json for variations of modlist/scenario"""
@@ -50,10 +57,27 @@ class ReforgerConfigGenerator:
         except json.JSONDecodeError as e:
             raise errors.ConfigFileInvalidJson(e)
         modded_config_dict = patch_file(base_config_content, modlist, scenario_id)
-        target_filepath = (self.target_dest / filename).with_suffix(".json")
+        target_filepath = as_config_file(self.target_dest, filename)
         # Create the file itself
         target_filepath.write_text(json.dumps(modded_config_dict))
         return target_filepath
+
+    def zeus_set_mission(self, filename):
+        """Load a mission that was previously uploaded via zeus_upload
+
+        Args:
+          filename: The partial file name that was uploaded before (eg. "Jib_20250215")
+
+        Raises:
+          ConfigFileNotFound: Loaded config file not found at all, did you zeus-upload?
+        """
+        self.target_dest.mkdir(parents=True, exist_ok=True)
+        target_filepath = as_config_file(self.target_dest, filename)
+        # Confirm the target file exists
+        if not target_filepath.is_file():
+            raise errors.ConfigFileNotFound(target_filepath)
+        symlink_path = self.target_dest / SYMLINK_FILENAME
+        symlink_path.symlink_to(target_filepath)
 
 
 def patch_file(source: dict, modlist: list[ModDetail], scenario_id: str) -> dict:

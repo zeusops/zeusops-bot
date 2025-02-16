@@ -8,7 +8,7 @@ Feature: Upload mission
 
 import json
 
-from zeusops_bot.command import ReforgerConfigGenerator
+from zeusops_bot.command import ReforgerConfigGenerator, as_config_file
 from zeusops_bot.models import ConfigFile, ModDetail
 
 BASE_CONFIG: ConfigFile = {"game": {"scenarioId": "old-value", "mods": []}}
@@ -20,7 +20,7 @@ MODLIST: list[ModDetail] = [
 ]
 
 
-def test_upload_creates_files(tmp_path):
+def test_upload_edits_files(tmp_path):
     """Scenario: Upload next mission creates file"""
     # Given a Zeusops mission locally ready
     # And Zeus specifies <modlist.json>, <scenarioId>, <filename>
@@ -38,3 +38,27 @@ def test_upload_creates_files(tmp_path):
     config = json.loads(out_path.read_text())
     assert config["game"]["scenarioId"] == scenario_id, "Should update scenarioId"
     assert config["game"]["mods"] == MODLIST, "Should update modlist"
+
+
+def test_load_mission(tmp_path):
+    """Scenario: Load mission from previous upload"""
+    # Given a Zeusops mission was uploaded already under <filename>
+    config_base = tmp_path / "reforger_configs"
+    filename = "Jib_20250228"
+    uploaded_conf_path = as_config_file(config_base, filename)
+    uploaded_conf_path.parent.mkdir(parents=True, exist_ok=True)
+    gen = ReforgerConfigGenerator(
+        base_config_file=uploaded_conf_path, target_folder=config_base
+    )
+    uploaded_conf_path.write_text(json.dumps(BASE_CONFIG))
+    # When Zeus calls "/zeus-set-mission" with <filename>
+    base_conf = tmp_path / "base.json"
+    base_conf.write_text(json.dumps(BASE_CONFIG))
+    gen.zeus_set_mission(filename)
+    # Then a symbolic link is created from "current-config.json" to <filename>
+    target = config_base / "current-config.json"
+    assert target.exists(), "Should have created latest config symlink"
+    assert target.is_symlink(), "Target config should be a symlink"
+    assert (
+        target.readlink() == uploaded_conf_path
+    ), "Target should point to uploaded file"
