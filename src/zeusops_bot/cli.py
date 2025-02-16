@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from zeusops_bot import command
+from zeusops_bot import reforger_config_gen as cmd
 from zeusops_bot.models import ModDetail
 
 
@@ -53,7 +53,7 @@ def main(
     filename: str,
 ):
     """Run the program's main command"""
-    conf_generator = command.ReforgerConfigGenerator(base_config_file, target_folder)
+    conf_generator = cmd.ReforgerConfigGenerator(base_config_file, target_folder)
     if modlist is not None:
         print(f"Loading {len(modlist)} mods, for {scenario_id=}...")
     else:

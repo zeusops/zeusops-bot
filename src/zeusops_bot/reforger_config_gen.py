@@ -1,4 +1,4 @@
-"""Commands that the bot can run"""
+"""Reforger config generation"""
 
 import json
 from pathlib import Path

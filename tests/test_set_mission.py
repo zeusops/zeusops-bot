@@ -3,7 +3,7 @@
 import json
 
 from tests.fixtures import BASE_CONFIG
-from zeusops_bot.command import ReforgerConfigGenerator, as_config_file
+from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, as_config_file
 
 
 def test_load_mission(tmp_path):

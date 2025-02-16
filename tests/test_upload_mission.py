@@ -9,7 +9,7 @@ Feature: Upload mission
 import json
 
 from tests.fixtures import BASE_CONFIG, MODLIST
-from zeusops_bot.command import ReforgerConfigGenerator
+from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
 
 
 def test_upload_edits_files(tmp_path):
