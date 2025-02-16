@@ -13,6 +13,10 @@ zeusops-bot = "zeusops_bot.cli:cli"
 python = "^3.12"
 # JSON patching (modifying files)
 jsonpatch = "*"
+# JSON Models and validation
+pydantic = "^2.10.6"
+# Envvar for settings and their validation
+pydantic-settings = "^2.7.1"
 
 
 [tool.poetry.group.test.dependencies]
