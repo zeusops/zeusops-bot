@@ -5,6 +5,7 @@ Feature: Upload mission
 
 Background:
   Given a discord channel to run commands in
+  And a base config file to overwrite with new modlist/scenario
 
 Scenario: Upload next mission
   Given a Zeusops mission locally ready
