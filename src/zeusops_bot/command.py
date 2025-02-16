@@ -26,16 +26,16 @@ class ReforgerConfigGenerator:
 
     def zeus_upload(
         self,
-        modlist: list[ModDetail],
         scenario_id: str,
         filename: str,
+        modlist: list[ModDetail] | None,
     ) -> Path:
         """Convert a modlist+scenario into a file on server at given path
 
         Args:
-          modlist: The exhaustive list of mods to load
           scenario_id: The scenarioID to load within the modlist (selects mission)
           filename: The filename to store the resulting file under
+          modlist: The exhaustive list of mods to load, or None to mean no change needed
 
         Returns:
           Path: Path to the file generated on filesystem, under :py:attr:`target_folder`
@@ -80,22 +80,24 @@ class ReforgerConfigGenerator:
         symlink_path.symlink_to(target_filepath)
 
 
-def patch_file(source: dict, modlist: list[ModDetail], scenario_id: str) -> dict:
+def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) -> dict:
     """Edit the content of source with new modlist and scenarioID
 
     >>> modlist=[{"modId": "1", "name":"mod1"}]
     >>> patch_file({"game": {"scenarioId": "old", "mods": []}}, modlist,"new")
     {'game': {'scenarioId': 'new', 'mods': [{'modId': '1', 'name': 'mod1'}]}}
+    >>> patch_file({"game": {"scenarioId": "old", "mods": []}}, None,"new")
+    {'game': {'scenarioId': 'new', 'mods': []}}
 
     Raises:
         ConfigPatchingError: Patching of the file failed, sending lib exception as arg
     """
-    patch = jsonpatch.JsonPatch(
-        [
-            {"op": "replace", "path": "/game/scenarioId", "value": scenario_id},
-            {"op": "replace", "path": "/game/mods", "value": modlist},
-        ]
-    )
+    patch_dict: list[dict] = [
+        {"op": "replace", "path": "/game/scenarioId", "value": scenario_id},
+    ]
+    if modlist is not None:
+        patch_dict.append({"op": "replace", "path": "/game/mods", "value": modlist})
+    patch = jsonpatch.JsonPatch(patch_dict)
     try:
         mod = patch.apply(source)
     except jsonpatch.JsonPatchException as e:

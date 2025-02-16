@@ -25,9 +25,9 @@ def parse_arguments(args: list[str]) -> argparse.Namespace:
     )
     parser.add_argument("base_config_path", help="The path to base config file")
     parser.add_argument("target_folder", help="The path where to store loaded configs")
-    parser.add_argument("mods", help="JSON string of modlist to load")
     parser.add_argument("scenario_id", help="Scenario ID to load")
-    parser.add_argument("config_file_name", help="Name under which to save config")
+    parser.add_argument("config_file_name", help="Name under which to save new config")
+    parser.add_argument("--mods", help="JSON string of modlist to load, or no change")
     return parser.parse_args(args)
 
 
@@ -48,13 +48,16 @@ def cli(arguments: list[str] | None = None):
 def main(
     base_config_file: Path,
     target_folder: Path,
-    modlist: list[ModDetail],
+    modlist: list[ModDetail] | None,
     scenario_id: str,
     filename: str,
 ):
     """Run the program's main command"""
     conf_generator = command.ReforgerConfigGenerator(base_config_file, target_folder)
-    print(f"Loading {len(modlist)} mods, for {scenario_id=}...")
-    out_path = conf_generator.zeus_upload(modlist, scenario_id, filename)
+    if modlist is not None:
+        print(f"Loading {len(modlist)} mods, for {scenario_id=}...")
+    else:
+        print(f"Loading {scenario_id=}...")
+    out_path = conf_generator.zeus_upload(scenario_id, filename, modlist)
     print(f"Saved under file {out_path.name}")
     return 0
