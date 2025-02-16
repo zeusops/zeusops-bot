@@ -4,8 +4,12 @@ import argparse
 import sys
 from pathlib import Path
 
+from pydantic import ValidationError
+
+from zeusops_bot import discord
 from zeusops_bot import reforger_config_gen as cmd
 from zeusops_bot.models import ModDetail
+from zeusops_bot.settings import DiscordConfig
 
 
 def parse_arguments(args: list[str]) -> argparse.Namespace:
@@ -23,11 +27,6 @@ def parse_arguments(args: list[str]) -> argparse.Namespace:
         "zeusops-bot",
         description="Multipurpose discord bot for the Zeusops community",
     )
-    parser.add_argument("base_config_path", help="The path to base config file")
-    parser.add_argument("target_folder", help="The path where to store loaded configs")
-    parser.add_argument("scenario_id", help="Scenario ID to load")
-    parser.add_argument("config_file_name", help="Name under which to save new config")
-    parser.add_argument("--mods", help="JSON string of modlist to load, or no change")
     return parser.parse_args(args)
 
 
@@ -35,24 +34,37 @@ def cli(arguments: list[str] | None = None):
     """Run the zeusops_bot cli"""
     if arguments is None:
         arguments = sys.argv[1:]
-    args = parse_arguments(arguments)
-    main(
-        Path(args.base_config),
-        Path(args.target_folder),
-        args.mods,
-        args.scenario_id,
-        args.config_file_name,
-    )
+    _args = parse_arguments(arguments)
+    main()
 
 
-def main(
+def main():
+    """Run the main bot"""
+    try:
+        discord_config = DiscordConfig()
+    except ValidationError as e:
+        errors = e.errors()
+        if not all([err["type"] == "missing" for err in errors]):
+            raise  # Not just missing errors = raise it as-is
+        # Just missing: print it pretty errors
+        prefix = DiscordConfig.model_config["env_prefix"]
+        envvars = [prefix + err["loc"][0] for err in errors]
+        print(f"Missing {len(envvars)} envvars:", file=sys.stderr)
+        for envvar in envvars:
+            print(f"- {envvar.upper()}", file=sys.stderr)
+        return 1
+    bot = discord.setup(discord_config)
+    bot.run(discord_config.token)
+
+
+def reforger_upload(
     base_config_file: Path,
     target_folder: Path,
     modlist: list[ModDetail] | None,
     scenario_id: str,
     filename: str,
 ):
-    """Run the program's main command"""
+    """Run the program's /zeus-upload command"""
     conf_generator = cmd.ReforgerConfigGenerator(base_config_file, target_folder)
     if modlist is not None:
         print(f"Loading {len(modlist)} mods, for {scenario_id=}...")

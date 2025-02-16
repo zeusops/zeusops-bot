@@ -17,6 +17,8 @@ jsonpatch = "*"
 pydantic = "^2.10.6"
 # Envvar for settings and their validation
 pydantic-settings = "^2.7.1"
+# Discord bot framework
+py-cord = "^2.6.1"
 
 
 [tool.poetry.group.test.dependencies]
