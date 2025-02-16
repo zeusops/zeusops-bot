@@ -1,8 +1,9 @@
 """Manage the Discord-side horrors"""
 
-from discord import Bot, Message
+import logging
 
-# from discord.ext import commands
+from discord import Bot
+
 from zeusops_bot.settings import DiscordConfig
 
 
@@ -14,26 +15,14 @@ class ZeusopsBot(Bot):
         super().__init__(*args, **kwargs)
         self.config = config
 
-    # FIXME: Convert from prefix commands into slash commands
-    # @commands.command(name="zeus-upload")
-    # async def zeus_upload(self, ctx, scenario_id: str):
-    #     """Upload a mission as a Zeus"""
-    #     await ctx.respond(f"Uploading {scenario_id=}")
+        logging.basicConfig(level=logging.DEBUG)
+        logging.getLogger("discord").setLevel(logging.INFO)
+        logging.getLogger("discord.gateway").setLevel(logging.WARNING)
+        self.logger = logging.getLogger(__name__)
 
-    # @commands.command(name="zeus-set-mission")
-    # async def zeus_set_mission(self, ctx, filename: str):
-    #     """Activate the given a mission file as a Zeus"""
-    #     await ctx.respond(f"Setting mission to {filename=}")
+        # TODO: load all cogs dynamically
+        self.load_extension("zeusops_bot.cogs.zeus_upload")
 
     async def on_ready(self):
         """Handle the 'ready' event"""
-        print("ready!")
-        print("Logged in as %s#%s" % (self.user.name, self.user.discriminator))
-
-    # TODO: deprecate
-    async def on_message(self, message: Message):
-        """Handle incoming messages"""
-        print(type(message.channel.id), type(self.config.cmd_listen_channel_id))
-        if message.channel.id != self.config.cmd_listen_channel_id:
-            return
-        print(f'received a message! {message.author} "{message.content}"')
+        self.logger.info("Logged in as %s#%s", self.user.name, self.user.discriminator)
