@@ -19,12 +19,12 @@ class DiscordConfig(BaseSettings):
 
     token: SecretStr
     """The actual secret to run the bot with"""
-    zeusops_guild_id: str
-    """The Zeusops main GuildID"""
-    cmd_listen_channel_id: str
+    # zeusops_guild_id: str
+    # """The Zeusops main GuildID"""
+    cmd_listen_channel_id: int
     """The Discord ChannelID to listen for commands onto"""
-    cmd_log_channel: str
-    """The Discord ChannelID to log result of commands onto"""
+    # cmd_log_channel: str
+    # """The Discord ChannelID to log result of commands onto"""
     model_config = SettingsConfigDict(env_prefix="bot_discord_")
 
 

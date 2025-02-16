@@ -6,8 +6,8 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from zeusops_bot import discord
 from zeusops_bot import reforger_config_gen as cmd
+from zeusops_bot.discord import ZeusopsBot
 from zeusops_bot.models import ModDetail
 from zeusops_bot.settings import DiscordConfig
 
@@ -53,8 +53,8 @@ def main():
         for envvar in envvars:
             print(f"- {envvar.upper()}", file=sys.stderr)
         return 1
-    bot = discord.setup(discord_config)
-    bot.run(discord_config.token)
+    bot = ZeusopsBot(discord_config)
+    bot.run(discord_config.token.get_secret_value())
 
 
 def reforger_upload(
