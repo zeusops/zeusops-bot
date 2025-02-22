@@ -1,15 +1,15 @@
 """Command line entrypoint for zeusops-bot"""
 
 import argparse
+import logging
 import sys
 from pathlib import Path
 
-from pydantic import ValidationError
-
 from zeusops_bot import reforger_config_gen as cmd
 from zeusops_bot.discord import ZeusopsBot
+from zeusops_bot.errors import ZeusopsBotConfigException
 from zeusops_bot.models import ModDetail
-from zeusops_bot.settings import DiscordConfig
+from zeusops_bot.settings import ZeusopsBotConfig, load
 
 
 def parse_arguments(args: list[str]) -> argparse.Namespace:
@@ -41,20 +41,23 @@ def cli(arguments: list[str] | None = None):
 def main():
     """Run the main bot"""
     try:
-        discord_config = DiscordConfig()
-    except ValidationError as e:
-        errors = e.errors()
-        if not all([err["type"] == "missing" for err in errors]):
-            raise  # Not just missing errors = raise it as-is
-        # Just missing: print it pretty errors
-        prefix = DiscordConfig.model_config["env_prefix"]
-        envvars = [prefix + err["loc"][0] for err in errors]
+        config = load(ZeusopsBotConfig)
+    except ZeusopsBotConfigException as e:
+        envvars = e.args[0]
         print(f"Missing {len(envvars)} envvars:", file=sys.stderr)
         for envvar in envvars:
             print(f"- {envvar.upper()}", file=sys.stderr)
         return 1
-    bot = ZeusopsBot(discord_config)
-    bot.run(discord_config.token.get_secret_value())
+    except Exception:
+        print("Error while loading the bot's config from envvars", file=sys.stderr)
+        raise
+
+    logging.basicConfig(level=logging.DEBUG)
+    logging.getLogger("discord").setLevel(logging.INFO)
+    logging.getLogger("discord.gateway").setLevel(logging.WARNING)
+
+    bot = ZeusopsBot(config, logging.getLogger("discord"))
+    bot.run()  # Token is already in config
 
 
 def reforger_upload(
