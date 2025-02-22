@@ -38,7 +38,7 @@ class ReforgerConfigGenerator:
           modlist: The exhaustive list of mods to load, or None to mean no change needed
 
         Returns:
-          Path: Path to the file generated on filesystem, under :py:attr:`target_folder`
+          Path: Path to the file generated on filesystem, under {py:attr}`target_folder`
 
         Raises:
           ConfigFileNotFound: Base config file not found at all
