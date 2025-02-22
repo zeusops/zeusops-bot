@@ -7,6 +7,12 @@ class ZeusopsBotException(Exception):
     pass
 
 
+class ZeusopsBotConfigException(ZeusopsBotException):
+    """The bot's config itself is wrong somehow"""
+
+    pass
+
+
 class BadConfigFileException(ZeusopsBotException):
     """The config file given is incorrect somehow"""
 
