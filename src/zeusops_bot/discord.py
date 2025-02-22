@@ -4,6 +4,7 @@ import logging
 
 from discord import Bot
 
+from zeusops_bot.cogs import ZeusUpload
 from zeusops_bot.settings import DiscordConfig
 
 
@@ -20,8 +21,8 @@ class ZeusopsBot(Bot):
         logging.getLogger("discord.gateway").setLevel(logging.WARNING)
         self.logger = logging.getLogger(__name__)
 
-        # TODO: load all cogs dynamically
-        self.load_extension("zeusops_bot.cogs.zeus_upload")
+        cog = ZeusUpload(self, config)
+        self.add_cog(cog)
 
     async def on_ready(self):
         """Handle the 'ready' event"""
