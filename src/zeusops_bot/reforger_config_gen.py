@@ -43,7 +43,6 @@ class ReforgerConfigGenerator:
         Raises:
           ConfigFileNotFound: Base config file not found at all
           ConfigFileInvalidJson: Base config file doesn't decode as valid JSON
-          ConfigFileInvalidJson: Base config file doesn't decode as valid JSON
           ConfigPatchingError: Patching of the file failed, sending lib exception as arg
 
         """

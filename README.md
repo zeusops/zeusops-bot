@@ -31,6 +31,16 @@ poetry shell
 zeusops-bot
 ```
 
+### Config
+
+Suggest the following config via `.env`:
+
+``` shell
+export BOT_REFORGER_REFERENCE_CONFIG=data/reference_config.json
+export BOT_REFORGER_CONFIG_FOLDER=data/generated/
+export BOT_DISCORD_TOKEN=$(pass zeusops/testapp_operationbot_token)
+```
+
 ## Development
 
 ### Python setup
