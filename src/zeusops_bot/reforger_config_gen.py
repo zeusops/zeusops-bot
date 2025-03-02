@@ -76,7 +76,7 @@ class ReforgerConfigGenerator:
         if not target_filepath.is_file():
             raise errors.ConfigFileNotFound(target_filepath)
         symlink_path = self.target_dest / SYMLINK_FILENAME
-        symlink_path.symlink_to(target_filepath)
+        symlink_path.symlink_to(target_filepath.relative_to(self.target_dest))
 
 
 def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) -> dict:

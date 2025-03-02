@@ -5,6 +5,12 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Fixed
+
+- Symlink for active mission created via `/zeus-set-mission` no longer point to
+  the absolute path of the config, but relative to current folder. Fixes path
+  issues when running inside containers (mismatching absolute paths)
+
 ## v0.2.0 - 2025-03-02
 
 ### Added

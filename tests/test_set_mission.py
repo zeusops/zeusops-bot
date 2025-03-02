@@ -25,6 +25,6 @@ def test_load_mission(tmp_path):
     target = config_base / "current-config.json"
     assert target.exists(), "Should have created latest config symlink"
     assert target.is_symlink(), "Target config should be a symlink"
-    assert (
-        target.readlink() == uploaded_conf_path
+    assert target.readlink() == uploaded_conf_path.relative_to(
+        config_base
     ), "Target should point to uploaded file"
