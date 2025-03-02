@@ -5,6 +5,8 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+## v0.2.1 - 2025-03-02
+
 ### Fixed
 
 - Symlink for active mission created via `/zeus-set-mission` no longer point to
