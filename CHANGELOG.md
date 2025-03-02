@@ -5,6 +5,8 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+## v0.2.0 - 2025-03-02
+
 ### Added
 
 - CLI runs discord bot for reforger server config, exposed as slash-commands
