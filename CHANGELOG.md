@@ -5,6 +5,12 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Added
+
+- CLI runs discord bot for reforger server config, exposed as slash-commands
+  `/zeus-upload` and `/zeus-set-mission`
+- New CI workflow for github, building the release-oriented docker image
+
 ## v0.1.0 - 2025-02-15
 
 ### Added
