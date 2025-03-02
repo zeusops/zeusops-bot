@@ -1,0 +1,57 @@
+---
+name: Publish Docker
+
+on:
+  push:
+
+env:
+  IMAGE_TAG: ghcr.io/${{ github.repository_owner }}/zeusops-bot:latest
+
+jobs:
+  build:
+    name: Build Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Image
+        run: docker build -f release.Dockerfile -t zeusops-bot .
+      - name: Save Image
+        run: docker save zeusops-bot | gzip > image.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: image
+          path: image.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
+  main_publish:
+    name: Publish Image
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: image
+      - name: Load Image
+        run: docker load < image.tar.gz
+      - name: lowercase repo
+        run: |
+          echo "IMAGE_TAG_LOWER=${IMAGE_TAG@L}" >> "${GITHUB_ENV}"
+      - name: Tag Image
+        run: docker tag zeusops-bot "$IMAGE_TAG_LOWER"
+      - name: Push Image
+        run: docker push "$IMAGE_TAG_LOWER"
