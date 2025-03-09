@@ -7,8 +7,7 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ### Added
 
-- New function `list_missions` to list all configured missions. Currently
-  unconnected from the bot.
+- New bot command `/zeus-list` to list all configured missions.
 
 ## v0.2.2 - 2025-03-09
 

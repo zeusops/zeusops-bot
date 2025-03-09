@@ -55,3 +55,13 @@ class ZeusUpload(commands.Cog):
         """Activate the given a mission file as a Zeus"""
         await ctx.respond(f"Setting mission to {filename=}")
         self.reforger_confgen.zeus_set_mission(filename)
+
+    @commands.slash_command(name="zeus-list")
+    async def zeus_list(self, ctx: discord.ApplicationContext):
+        """List available missions created via `/zeus-upload`"""
+        missions = self.reforger_confgen.list_missions()
+        if not missions:
+            await ctx.respond("No missions configured")
+            return
+        missions_str = "\n- ".join(missions)
+        await ctx.respond(f"Missions: {missions_str}")
