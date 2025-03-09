@@ -3,6 +3,7 @@
 import argparse
 import logging
 import sys
+from enum import IntEnum
 from pathlib import Path
 
 from zeusops_bot import reforger_config_gen as cmd
@@ -10,6 +11,13 @@ from zeusops_bot.discord import ZeusopsBot
 from zeusops_bot.errors import ZeusopsBotConfigException
 from zeusops_bot.models import ModDetail
 from zeusops_bot.settings import ZeusopsBotConfig, load
+
+
+class Exit(IntEnum):
+    """Exit codes for the CLI"""
+
+    SUCCESS = 0
+    FAILURE = 1
 
 
 def parse_arguments(args: list[str]) -> argparse.Namespace:
@@ -35,7 +43,7 @@ def cli(arguments: list[str] | None = None):
     if arguments is None:
         arguments = sys.argv[1:]
     _args = parse_arguments(arguments)
-    main()
+    return main()
 
 
 def main():
@@ -47,7 +55,7 @@ def main():
         print(f"Missing {len(envvars)} envvars:", file=sys.stderr)
         for envvar in envvars:
             print(f"- {envvar.upper()}", file=sys.stderr)
-        return 1
+        return Exit.FAILURE
     except Exception:
         print("Error while loading the bot's config from envvars", file=sys.stderr)
         raise
@@ -75,4 +83,4 @@ def reforger_upload(
         print(f"Loading {scenario_id=}...")
     out_path = conf_generator.zeus_upload(scenario_id, filename, modlist)
     print(f"Saved under file {out_path.name}")
-    return 0
+    return Exit.SUCCESS
