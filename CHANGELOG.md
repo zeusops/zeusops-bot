@@ -5,6 +5,11 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Added
+
+- New function `list_missions` to list all configured missions. Currently
+  unconnected from the bot.
+
 ## v0.2.2 - 2025-03-09
 
 ### Fixed

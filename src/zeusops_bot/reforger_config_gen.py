@@ -85,6 +85,20 @@ class ReforgerConfigGenerator:
         # FileExistsError instead of replacing the target
         temp_symlink_path.rename(symlink_path)
 
+    def list_missions(self) -> list[str]:
+        """List all missions available in the config folder
+
+        Returns:
+          List of mission names available in the folder
+        """
+        entries = self.target_dest.iterdir()
+        mission_names = [
+            entry.stem
+            for entry in entries
+            if entry.is_file() and entry.stem != SYMLINK_FILENAME
+        ]
+        return mission_names
+
 
 def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) -> dict:
     """Edit the content of source with new modlist and scenarioID
