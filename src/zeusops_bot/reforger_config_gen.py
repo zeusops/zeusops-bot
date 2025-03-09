@@ -92,10 +92,11 @@ class ReforgerConfigGenerator:
           List of mission names available in the folder
         """
         entries = self.target_dest.iterdir()
+        ignored_names = [SYMLINK_FILENAME, "config.json"]
         mission_names = [
             entry.stem
             for entry in entries
-            if entry.is_file() and entry.stem != SYMLINK_FILENAME
+            if entry.is_file() and entry.name not in ignored_names
         ]
         return mission_names
 

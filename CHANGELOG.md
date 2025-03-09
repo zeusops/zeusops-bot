@@ -5,6 +5,11 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Fixed
+
+- `/zeus-list` command properly ignores `current-config.json` and `config.json`
+- First item in mission list is now properly bulleted
+
 ## v0.3.0 - 2025-03-09
 
 ### Added

@@ -64,4 +64,4 @@ class ZeusUpload(commands.Cog):
             await ctx.respond("No missions configured")
             return
         missions_str = "\n- ".join(missions)
-        await ctx.respond(f"Missions: {missions_str}")
+        await ctx.respond(f"Missions: \n- {missions_str}")
