@@ -5,6 +5,8 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+## v0.2.2 - 2025-03-09
+
 ### Fixed
 
 - Calling `/zeus-set-mission` after an existing mission has already been set no

@@ -3,7 +3,7 @@ name = "zeusops_bot"
 description = "Multipurpose discord bot for the Zeusops community"
 authors = ["Jb Doyon <jb@jiby.tech>", "Sami Laine <sami.v.laine@gmail.com>"]
 readme = "README.md"
-version = "0.2.1"
+version = "0.2.2"
 
 
 [tool.poetry.scripts]
