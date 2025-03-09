@@ -5,6 +5,11 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Fixed
+
+- Calling `/zeus-set-mission` after an existing mission has already been set no
+  longer crashes with `FileExistsError`.
+
 ## v0.2.1 - 2025-03-02
 
 ### Fixed

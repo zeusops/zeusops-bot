@@ -76,7 +76,14 @@ class ReforgerConfigGenerator:
         if not target_filepath.is_file():
             raise errors.ConfigFileNotFound(target_filepath)
         symlink_path = self.target_dest / SYMLINK_FILENAME
-        symlink_path.symlink_to(target_filepath.relative_to(self.target_dest))
+        link_dest = target_filepath.relative_to(self.target_dest)
+        # Python throws FileExistsError on existing link, doesn't allow
+        # 'ln --force': use a temp file and rename atomically instead
+        temp_symlink_path = symlink_path.with_suffix(".tmp")
+        temp_symlink_path.symlink_to(link_dest)
+        # NOTE: Will not work as expected on Windows, raises a
+        # FileExistsError instead of replacing the target
+        temp_symlink_path.rename(symlink_path)
 
 
 def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) -> dict:
