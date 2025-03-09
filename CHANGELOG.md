@@ -5,6 +5,8 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+## v0.3.1 - 2025-03-09
+
 ### Fixed
 
 - `/zeus-list` command properly ignores `current-config.json` and `config.json`
