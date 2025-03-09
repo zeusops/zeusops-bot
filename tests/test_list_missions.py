@@ -8,18 +8,21 @@ Feature: List uploaded mission configs
 
 from pathlib import Path
 
+import pytest
+
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
 
 
-def test_list_missions(tmp_path: Path):
+@pytest.mark.parametrize(
+    "mission_names", [["mission1", "mission2"], []], ids=["two missions", "empty"]
+)
+def test_list_missions(tmp_path: Path, mission_names: list[str]):
     """Scenario: List uploaded missions"""
     # Given files "mission1.json" and "mission2.json" exist in the mission directory
-    mission_name1 = "mission1"
-    mission_name2 = "mission2"
     mission_dir = tmp_path / "missions"
     mission_dir.mkdir()
-    (mission_dir / mission_name1).with_suffix(".json").touch()
-    (mission_dir / mission_name2).with_suffix(".json").touch()
+    for mission_name in mission_names:
+        (mission_dir / mission_name).with_suffix(".json").touch()
     source_file = tmp_path / "source.json"
     source_file.touch()
     gen = ReforgerConfigGenerator(
@@ -28,4 +31,4 @@ def test_list_missions(tmp_path: Path):
     # When Zeus calls "/zeus-list"
     result: list[str] = gen.list_missions()
     # Then a list of mission names is returned
-    assert [mission_name1, mission_name2] == result, "Should return mission names"
+    assert result == mission_names, "Should return mission names"
