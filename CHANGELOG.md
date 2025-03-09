@@ -5,6 +5,8 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+## v0.3.0 - 2025-03-09
+
 ### Added
 
 - New bot command `/zeus-list` to list all configured missions.
