@@ -65,3 +65,13 @@ class ZeusUpload(commands.Cog):
             return
         missions_str = "\n- ".join(missions)
         await ctx.respond(f"Missions: \n- {missions_str}")
+
+    @commands.slash_command(name="current-mission")
+    async def current_mission(self, ctx: discord.ApplicationContext):
+        """List currently configured mission"""
+        try:
+            await ctx.respond(
+                f"Current mission: `{self.reforger_confgen.current_mission()}`"
+            )
+        except ConfigFileNotFound as e:
+            await ctx.respond(f"Could not find configured mission: {str(e)}")

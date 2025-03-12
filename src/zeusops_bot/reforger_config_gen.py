@@ -100,6 +100,20 @@ class ReforgerConfigGenerator:
         ]
         return mission_names
 
+    def current_mission(self) -> str:
+        """Show currently active mission
+
+        Returns:
+          Currently active mission name
+        """
+        symlink_path = self.target_dest / SYMLINK_FILENAME
+        target = symlink_path.readlink()
+        if not (symlink_path.parent / target).exists():
+            raise errors.ConfigFileNotFound(
+                f"Current mission points to a missing config {target}"
+            )
+        return target.stem
+
 
 def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) -> dict:
     """Edit the content of source with new modlist and scenarioID

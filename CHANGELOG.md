@@ -5,6 +5,10 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Added
+
+- New bot command `/current-mission` to show the currently active mission config.
+
 ## v0.3.1 - 2025-03-09
 
 ### Fixed
