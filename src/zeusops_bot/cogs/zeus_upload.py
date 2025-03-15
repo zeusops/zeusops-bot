@@ -2,6 +2,7 @@
 
 import json
 from io import BytesIO
+from typing import Annotated
 
 import discord
 from discord.ext import commands
@@ -15,7 +16,9 @@ from zeusops_bot.errors import (
 from zeusops_bot.models import ModDetail
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
 
-DiscordAttachment = discord.Option(discord.SlashCommandOptionType.attachment)
+DiscordAttachment = Annotated[
+    discord.Attachment, discord.Option(discord.SlashCommandOptionType.attachment)
+]
 
 modlist_typeadapter = TypeAdapter(list[ModDetail])
 
@@ -59,7 +62,7 @@ class ZeusUpload(commands.Cog):
                 f"Error was: {str(e)}"
             )
 
-    @commands.slash_command(name="zeus-upload")
+    @commands.slash_command(name="zeus-upload-modlist")
     async def zeus_upload_with_modlist(
         self,
         ctx: discord.ApplicationContext,
