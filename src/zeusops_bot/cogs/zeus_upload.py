@@ -15,9 +15,11 @@ from zeusops_bot.errors import (
 )
 from zeusops_bot.models import ModDetail
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
+from zeusops_bot.settings import ZeusopsBotConfig
 
-DiscordAttachment = Annotated[
-    discord.Attachment, discord.Option(discord.SlashCommandOptionType.attachment)
+OptionalDiscordAttachment = Annotated[
+    discord.Attachment,
+    discord.Option(discord.SlashCommandOptionType.attachment, required=False),
 ]
 
 modlist_typeadapter = TypeAdapter(list[ModDetail])
@@ -26,7 +28,7 @@ modlist_typeadapter = TypeAdapter(list[ModDetail])
 class ZeusUpload(commands.Cog):
     """ZeusUpload cog for handling mission uploads"""
 
-    def __init__(self, bot, config):
+    def __init__(self, bot: discord.Bot, config: ZeusopsBotConfig):
         """Initialise the cog"""
         self.bot = bot
         self.config = config
@@ -37,79 +39,64 @@ class ZeusUpload(commands.Cog):
 
     @commands.slash_command(name="zeus-upload")
     async def zeus_upload(
-        self, ctx: discord.ApplicationContext, scenario_id: str, filename: str
-    ):
-        """Upload a mission as a Zeus"""
-        try:  # TODO: How do we pass modlist != None
-            path = self.reforger_confgen.zeus_upload(
-                scenario_id, filename, modlist=None
-            )
-            await ctx.respond(f"Mission uploaded successfully under {path=}")
-        except ConfigFileNotFound:
-            await ctx.respond(
-                "Bot config error: the base config file could not be found"
-                " Tell the Techmins! Path was: "
-                + str(self.reforger_confgen.base_config)
-            )
-        except ConfigFileInvalidJson as e:
-            await ctx.respond(
-                "Bot config error: the base config file is invalid JSON "
-                "Tell the Techmins! Error was: " + str(e)
-            )
-        except ConfigPatchingError as e:
-            await ctx.respond(
-                "Failed to patch your requested change over base config.\n"
-                f"Error was: {str(e)}"
-            )
-
-    @commands.slash_command(name="zeus-upload-modlist")
-    async def zeus_upload_with_modlist(
         self,
         ctx: discord.ApplicationContext,
         scenario_id: str,
-        modlist: DiscordAttachment,
         filename: str,
+        modlist: OptionalDiscordAttachment,
     ):
-        """Upload a mission as a Zeus, with modlist too"""
+        """Upload a mission as a Zeus"""
+        if modlist is not None:
+            try:
+                with BytesIO() as inmemoryfile:
+                    await modlist.save(inmemoryfile)
+                    modlist_json: list[ModDetail] | None = json.loads(
+                        inmemoryfile.getvalue()
+                    )
+                modlist_typeadapter.validate_python(modlist_json)
+            except json.JSONDecodeError as e:
+                await ctx.respond(
+                    "Failed to understand the attached modlist as JSON. "
+                    "Check the file was exported from the workshop, "
+                    "try confirming with an online validator like "
+                    "<https://jsonlint.com/>. "
+                    f"Parse error was: {e}"
+                )
+                return
+            except ValidationError as e:
+                await ctx.respond(
+                    "Failed to understand the modlist given: valid JSON, "
+                    "but not a list of mod objects (name/ID/optional-version). "
+                    "Check the file was exported from the workshop? "
+                    f"Validation error was: {e}"
+                )
+                return
+        else:
+            modlist_json = None
+
         try:
-            with BytesIO() as inmemoryfile:
-                modlist.save(inmemoryfile)
-                modlist_json = json.loads(inmemoryfile.getvalue())
-            modlist_typeadapter.validate_python(modlist_json)
             path = self.reforger_confgen.zeus_upload(
                 scenario_id, filename, modlist=modlist_json
-            )
-            await ctx.respond(f"Mission uploaded successfully under {path=}")
-        except json.JSONDecodeError as e:
-            await ctx.respond(
-                "Failed to understand the attached modlist as JSON. "
-                "Check the file was exported from the workshop, "
-                "try confirming with an online validator like "
-                "https://jsonlint.com/;"
-                f"Parse error was: {e}"
-            )
-        except ValidationError as e:
-            await ctx.respond(
-                "Failed to understand the modlist given: valid JSON, "
-                "but not a list of mod objects (name/ID/optional-version). "
-                "Check the file was exported from the workshop? "
-                f"Validation error was: {e}"
             )
         except ConfigFileNotFound:
             await ctx.respond(
                 "Bot config error: the base config file could not be found"
                 f" Tell the Techmins! Path was: {self.reforger_confgen.base_config}"
             )
+            return
         except ConfigFileInvalidJson as e:
             await ctx.respond(
                 "Bot config error: the base config file is invalid JSON "
                 "Tell the Techmins! Error was: " + str(e)
             )
+            return
         except ConfigPatchingError as e:
             await ctx.respond(
                 "Failed to patch your requested change over base config.\n"
                 f"Error was: {str(e)}"
             )
+            return
+        await ctx.respond(f"Mission uploaded successfully under {path=}")
 
     @commands.slash_command(name="zeus-set-mission")
     async def zeus_set_mission(self, ctx: discord.ApplicationContext, filename: str):
