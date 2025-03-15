@@ -1,14 +1,23 @@
 """zeus_upload extension"""
 
+import json
+from io import BytesIO
+
 import discord
 from discord.ext import commands
+from pydantic import TypeAdapter, ValidationError
 
 from zeusops_bot.errors import (
     ConfigFileInvalidJson,
     ConfigFileNotFound,
     ConfigPatchingError,
 )
+from zeusops_bot.models import ModDetail
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
+
+DiscordAttachment = discord.Option(discord.SlashCommandOptionType.attachment)
+
+modlist_typeadapter = TypeAdapter(list[ModDetail])
 
 
 class ZeusUpload(commands.Cog):
@@ -38,6 +47,55 @@ class ZeusUpload(commands.Cog):
                 "Bot config error: the base config file could not be found"
                 " Tell the Techmins! Path was: "
                 + str(self.reforger_confgen.base_config)
+            )
+        except ConfigFileInvalidJson as e:
+            await ctx.respond(
+                "Bot config error: the base config file is invalid JSON "
+                "Tell the Techmins! Error was: " + str(e)
+            )
+        except ConfigPatchingError as e:
+            await ctx.respond(
+                "Failed to patch your requested change over base config.\n"
+                f"Error was: {str(e)}"
+            )
+
+    @commands.slash_command(name="zeus-upload")
+    async def zeus_upload_with_modlist(
+        self,
+        ctx: discord.ApplicationContext,
+        scenario_id: str,
+        modlist: DiscordAttachment,
+        filename: str,
+    ):
+        """Upload a mission as a Zeus, with modlist too"""
+        try:
+            with BytesIO() as inmemoryfile:
+                modlist.save(inmemoryfile)
+                modlist_json = json.loads(inmemoryfile.getvalue())
+            modlist_typeadapter.validate_python(modlist_json)
+            path = self.reforger_confgen.zeus_upload(
+                scenario_id, filename, modlist=modlist_json
+            )
+            await ctx.respond(f"Mission uploaded successfully under {path=}")
+        except json.JSONDecodeError as e:
+            await ctx.respond(
+                "Failed to understand the attached modlist as JSON. "
+                "Check the file was exported from the workshop, "
+                "try confirming with an online validator like "
+                "https://jsonlint.com/;"
+                f"Parse error was: {e}"
+            )
+        except ValidationError as e:
+            await ctx.respond(
+                "Failed to understand the modlist given: valid JSON, "
+                "but not a list of mod objects (name/ID/optional-version). "
+                "Check the file was exported from the workshop? "
+                f"Validation error was: {e}"
+            )
+        except ConfigFileNotFound:
+            await ctx.respond(
+                "Bot config error: the base config file could not be found"
+                f" Tell the Techmins! Path was: {self.reforger_confgen.base_config}"
             )
         except ConfigFileInvalidJson as e:
             await ctx.respond(
