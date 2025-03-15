@@ -9,6 +9,7 @@ from pathlib import Path
 from zeusops_bot import reforger_config_gen as cmd
 from zeusops_bot.discord import ZeusopsBot
 from zeusops_bot.errors import ZeusopsBotConfigException
+from zeusops_bot.logging import setup_logging
 from zeusops_bot.models import ModDetail
 from zeusops_bot.settings import ZeusopsBotConfig, load
 
@@ -35,6 +36,11 @@ def parse_arguments(args: list[str]) -> argparse.Namespace:
         "zeusops-bot",
         description="Multipurpose discord bot for the Zeusops community",
     )
+    parser.add_argument(
+        "--debug",
+        help="Enable debug logging",
+        action="store_true",
+    )
     return parser.parse_args(args)
 
 
@@ -43,10 +49,10 @@ def cli(arguments: list[str] | None = None):
     if arguments is None:
         arguments = sys.argv[1:]
     _args = parse_arguments(arguments)
-    return main()
+    return main(_args.debug)
 
 
-def main():
+def main(debug: bool = False):
     """Run the main bot"""
     try:
         config = load(ZeusopsBotConfig)
@@ -60,11 +66,9 @@ def main():
         print("Error while loading the bot's config from envvars", file=sys.stderr)
         raise
 
-    logging.basicConfig(level=logging.DEBUG)
-    logging.getLogger("discord").setLevel(logging.INFO)
-    logging.getLogger("discord.gateway").setLevel(logging.WARNING)
+    setup_logging(debug)
 
-    bot = ZeusopsBot(config, logging.getLogger("discord"))
+    bot = ZeusopsBot(config, logging.getLogger("zeusops.discord"))
     bot.run()  # Token is already in config
 
 

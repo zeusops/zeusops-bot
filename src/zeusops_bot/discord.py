@@ -1,5 +1,7 @@
 """Manage the Discord-side horrors"""
 
+from logging import Logger
+
 from discord import Bot
 
 from zeusops_bot.cogs import ZeusUpload
@@ -9,7 +11,7 @@ from zeusops_bot.settings import ZeusopsBotConfig
 class ZeusopsBot(Bot):
     """A Discord Client for general purposes"""
 
-    def __init__(self, config: ZeusopsBotConfig, logger, *args, **kwargs):
+    def __init__(self, config: ZeusopsBotConfig, logger: Logger, *args, **kwargs):
         """Initialize the Client"""
         super().__init__(*args, **kwargs)
         self.config = config

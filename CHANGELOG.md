@@ -5,6 +5,10 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Added
+
+- Command line flag `--debug` for enabling more verbose debug logging.
+
 ### Fixed
 
 - Uploaded missions are now pretty-printed, to make it reviewable.
