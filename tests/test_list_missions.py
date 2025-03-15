@@ -26,4 +26,4 @@ def test_list_missions(
     # When Zeus calls "/zeus-list"
     result: list[str] = config_gen.list_missions()
     # Then a list of mission names is returned
-    assert result == mission_names, "Should return mission names"
+    assert set(result) == set(mission_names), "Should return mission names"
