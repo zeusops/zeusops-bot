@@ -4,9 +4,13 @@ import json
 from pathlib import Path
 
 import jsonpatch
+from pydantic import TypeAdapter, ValidationError
 
 from zeusops_bot import errors
+from zeusops_bot.errors import ConfigFileInvalidJson
 from zeusops_bot.models import ModDetail
+
+modlist_typeadapter = TypeAdapter(list["ModDetail"])
 
 SYMLINK_FILENAME = "current-config.json"
 
@@ -138,3 +142,24 @@ def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) 
     except jsonpatch.JsonPatchException as e:
         raise errors.ConfigPatchingError(e)
     return mod
+
+
+def extract_mods(modlist: str | None) -> list[ModDetail] | None:
+    """Extracts a list of ModDetail entries from a mod list exported from Reforger."""
+    if modlist is None:
+        return None
+    modlist = f"[{modlist}]"
+    try:
+        return modlist_typeadapter.validate_json(modlist)
+    except ValidationError as e:
+        errors = e.errors()
+        if len(errors) > 1:
+            # Got more than 1 error, not our problem
+            raise e
+        error = errors[0]
+        match error["type"]:
+            case "json_invalid":
+                raise ConfigFileInvalidJson(e)
+            case _:
+                # Unknown error
+                raise e
