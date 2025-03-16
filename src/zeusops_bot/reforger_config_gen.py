@@ -58,7 +58,7 @@ class ReforgerConfigGenerator:
         modded_config_dict = patch_file(base_config_content, modlist, scenario_id)
         target_filepath = as_config_file(self.target_dest, filename)
         # Create the file itself
-        target_filepath.write_text(json.dumps(modded_config_dict))
+        target_filepath.write_text(json.dumps(modded_config_dict, indent=4))
         return target_filepath
 
     def zeus_set_mission(self, filename):

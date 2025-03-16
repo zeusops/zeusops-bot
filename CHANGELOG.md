@@ -5,6 +5,10 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Fixed
+
+- Uploaded missions are now pretty-printed, to make it reviewable.
+
 ## v0.4.0 - 2025-03-12
 
 ### Added
