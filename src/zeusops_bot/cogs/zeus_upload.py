@@ -1,7 +1,6 @@
 """zeus_upload extension"""
 
 import json
-from io import BytesIO
 from typing import Annotated
 
 import discord
@@ -13,7 +12,7 @@ from zeusops_bot.errors import (
     ConfigFileNotFound,
     ConfigPatchingError,
 )
-from zeusops_bot.models import ModDetail
+from zeusops_bot.models import ModDetail, extract_mods
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
 from zeusops_bot.settings import ZeusopsBotConfig
 
@@ -46,38 +45,32 @@ class ZeusUpload(commands.Cog):
         modlist: OptionalDiscordAttachment,
     ):
         """Upload a mission as a Zeus"""
-        if modlist is not None:
-            try:
-                with BytesIO() as inmemoryfile:
-                    await modlist.save(inmemoryfile)
-                    modlist_json: list[ModDetail] | None = json.loads(
-                        inmemoryfile.getvalue()
-                    )
-                modlist_typeadapter.validate_python(modlist_json)
-            except json.JSONDecodeError as e:
-                await ctx.respond(
-                    "Failed to understand the attached modlist as JSON. "
-                    "Check the file was exported from the workshop, "
-                    "try confirming with an online validator like "
-                    "<https://jsonlint.com/>. "
-                    f"Parse error was: {e}"
-                )
-                return
-            except ValidationError as e:
-                await ctx.respond(
-                    "Failed to understand the modlist given: valid JSON, "
-                    "but not a list of mod objects (name/ID/optional-version). "
-                    "Check the file was exported from the workshop? "
-                    f"Validation error was: {e}"
-                )
-                return
-        else:
-            modlist_json = None
-
         try:
+            if modlist is None:
+                extracted_mods = None
+            else:
+                data = await modlist.read()
+                extracted_mods = extract_mods(data.decode())
             path = self.reforger_confgen.zeus_upload(
-                scenario_id, filename, modlist=modlist_json
+                scenario_id, filename, modlist=extracted_mods
             )
+        except json.JSONDecodeError as e:
+            await ctx.respond(
+                "Failed to understand the attached modlist as JSON. "
+                "Check the file was exported from the workshop, "
+                "try confirming with an online validator like "
+                "<https://jsonlint.com/>. "
+                f"Parse error was: {e}"
+            )
+            return
+        except ValidationError as e:
+            await ctx.respond(
+                "Failed to understand the modlist given: valid JSON, "
+                "but not a list of mod objects (name/ID/optional-version). "
+                "Check the file was exported from the workshop? "
+                f"Validation error was: {e}"
+            )
+            return
         except ConfigFileNotFound:
             await ctx.respond(
                 "Bot config error: the base config file could not be found"

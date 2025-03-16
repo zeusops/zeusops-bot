@@ -8,7 +8,8 @@ Feature: Upload mission
 
 import json
 
-from tests.fixtures import BASE_CONFIG, MODLIST
+from tests.fixtures import BASE_CONFIG, MODLIST_DICT, MODLIST_JSON
+from zeusops_bot.models import extract_mods
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
 
 
@@ -23,13 +24,15 @@ def test_upload_edits_files(tmp_path):
     source_file.write_text(json.dumps(BASE_CONFIG))
     gen = ReforgerConfigGenerator(base_config_file=source_file, target_folder=dest)
     # When Zeus calls "/zeus-upload"
-    out_path = gen.zeus_upload(scenario_id, filename, MODLIST)
+    modlist = extract_mods(MODLIST_JSON)
+    out_path = gen.zeus_upload(scenario_id, filename, modlist)
     # Then a new server config file is created
     assert out_path.is_file(), "Should have generated a file on disk"
     # And the config file is patched with <modlist.json> and <scenarioId>
     config = json.loads(out_path.read_text())
     assert config["game"]["scenarioId"] == scenario_id, "Should update scenarioId"
-    assert config["game"]["mods"] == MODLIST, "Should update modlist"
+    assert isinstance(config["game"]["mods"], list)
+    assert config["game"]["mods"][0] == MODLIST_DICT[0]
 
 
 def test_upload_edits_files_without_modlist(tmp_path):
@@ -49,4 +52,5 @@ def test_upload_edits_files_without_modlist(tmp_path):
     # And the config file is patched with just <scenarioId>
     config = json.loads(out_path.read_text())
     assert config["game"]["scenarioId"] == scenario_id, "Should update scenarioId"
+    assert isinstance(config["game"]["mods"], list)
     assert config["game"]["mods"] == BASE_CONFIG["game"]["mods"], "Should keep modlist"
