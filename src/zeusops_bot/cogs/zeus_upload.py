@@ -4,7 +4,10 @@ import json
 from typing import Annotated
 
 import discord
+
+# from discord.commands import option
 from discord.ext import commands
+from discord.utils import basic_autocomplete
 from pydantic import TypeAdapter, ValidationError
 
 from zeusops_bot.errors import (
@@ -22,6 +25,23 @@ OptionalDiscordAttachment = Annotated[
 ]
 
 modlist_typeadapter = TypeAdapter(list[ModDetail])
+
+
+async def _autocomplete_missions(ctx: discord.AutocompleteContext) -> list[str]:
+    return [
+        mission
+        for mission in ReforgerConfigGenerator.get_config().list_missions()
+        if ctx.value.lower() in mission.lower()
+    ]
+
+
+# NOTE: this isn't needed when using the autocomplete decorator
+AutocompletedMission = Annotated[
+    str,
+    discord.Option(
+        str, "mission", autocomplete=basic_autocomplete(_autocomplete_missions)
+    ),
+]
 
 
 class ZeusUpload(commands.Cog):
@@ -92,7 +112,16 @@ class ZeusUpload(commands.Cog):
         await ctx.respond(f"Mission uploaded successfully under {path=}")
 
     @commands.slash_command(name="zeus-set-mission")
-    async def zeus_set_mission(self, ctx: discord.ApplicationContext, filename: str):
+    # NOTE: there are two ways of creating auto-completions, this decorator and
+    #       the `AutocompletedMission` type hint
+    # @option(
+    #     "filename", description="Mission filename", autocomplete=autocomplete_missions
+    # )
+    async def zeus_set_mission(
+        self,
+        ctx: discord.ApplicationContext,
+        filename: AutocompletedMission,
+    ):
         """Activate the given a mission file as a Zeus"""
         await ctx.respond(f"Setting mission to {filename=}")
         self.reforger_confgen.zeus_set_mission(filename)
