@@ -9,6 +9,7 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 - `/zeus-upload` command now accepts an optional modlist (JSON snippet exported
   from Mod Presets menu in Reforger).
+- `/zeus-set-mission` now autocompletes based on known missions.
 - Command line flag `--debug` for enabling more verbose debug logging.
 
 ### Fixed
