@@ -11,6 +11,17 @@ from zeusops_bot.models import ModDetail
 SYMLINK_FILENAME = "current-config.json"
 
 
+class Instance:
+    """A config singleton instance"""
+
+    def __init__(self):
+        """Initialise the config instance"""
+        self.config: "ReforgerConfigGenerator" | None = None
+
+
+instance = Instance()
+
+
 def as_config_file(target_dest: Path, filename: str) -> Path:
     """Expands the config file path to absolute"""
     return (target_dest / filename).with_suffix(".json")
@@ -23,6 +34,7 @@ class ReforgerConfigGenerator:
         """Instantiate a config generator with the base config to use"""
         self.base_config = base_config_file
         self.target_dest = target_folder
+        instance.config = self
 
     def zeus_upload(
         self,
@@ -61,7 +73,7 @@ class ReforgerConfigGenerator:
         target_filepath.write_text(json.dumps(modded_config_dict, indent=4))
         return target_filepath
 
-    def zeus_set_mission(self, filename):
+    def zeus_set_mission(self, filename: str):
         """Load a mission that was previously uploaded via zeus_upload
 
         Args:
@@ -113,6 +125,17 @@ class ReforgerConfigGenerator:
                 f"Current mission points to a missing config {target}"
             )
         return target.stem
+
+    @staticmethod
+    def get_config() -> "ReforgerConfigGenerator":
+        """Get currently active (most recently created) config generator"""
+        if instance.config is None:
+            raise ValueError(
+                "Instance config has not been set. This method can only be "
+                "called after at least one config generator has been "
+                "initialised."
+            )
+        return instance.config
 
 
 def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) -> dict:
