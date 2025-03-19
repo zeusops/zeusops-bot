@@ -53,8 +53,12 @@ class ZeusUpload(commands.Cog):
     @commands.slash_command(name="zeus-set-mission")
     async def zeus_set_mission(self, ctx: discord.ApplicationContext, filename: str):
         """Activate the given a mission file as a Zeus"""
+        try:
+            self.reforger_confgen.zeus_set_mission(filename)
+        except ConfigFileNotFound:
+            await ctx.respond(f"Error: could not find mission '{filename}'")
+            return
         await ctx.respond(f"Setting mission to {filename=}")
-        self.reforger_confgen.zeus_set_mission(filename)
 
     @commands.slash_command(name="zeus-list")
     async def zeus_list(self, ctx: discord.ApplicationContext):
@@ -75,3 +79,10 @@ class ZeusUpload(commands.Cog):
             )
         except ConfigFileNotFound as e:
             await ctx.respond(f"Could not find configured mission: {str(e)}")
+
+    @commands.Cog.listener()
+    async def on_application_command_error(
+        self, ctx: discord.ApplicationContext, error: discord.DiscordException
+    ):
+        """Handle application command errors"""
+        await ctx.respond(f"Error: {error}")
