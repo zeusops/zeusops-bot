@@ -75,3 +75,10 @@ class ZeusUpload(commands.Cog):
             )
         except ConfigFileNotFound as e:
             await ctx.respond(f"Could not find configured mission: {str(e)}")
+
+    @commands.Cog.listener()
+    async def on_application_command_error(
+        self, ctx: discord.ApplicationContext, error: discord.DiscordException
+    ):
+        """Handles application command errors that are not caught elsewhere"""
+        await ctx.respond(f"Unhandled exception: {error}")
