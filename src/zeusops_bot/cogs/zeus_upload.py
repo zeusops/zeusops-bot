@@ -1,9 +1,15 @@
 """zeus_upload extension"""
 
+import typing
+
 import discord
+from discord.commands import option
 from discord.ext import commands
+from discord.utils import basic_autocomplete
 from pydantic import TypeAdapter, ValidationError
 
+if typing.TYPE_CHECKING:
+    from zeusops_bot.discord import ZeusopsBot
 from zeusops_bot.errors import (
     ConfigFileInvalidJson,
     ConfigFileNotFound,
@@ -11,22 +17,27 @@ from zeusops_bot.errors import (
 )
 from zeusops_bot.models import ModDetail
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, extract_mods
-from zeusops_bot.settings import ZeusopsBotConfig
 
 modlist_typeadapter = TypeAdapter(list[ModDetail])
+
+
+def _autocomplete_missions(ctx: discord.AutocompleteContext) -> list[str]:
+    """List known missions
+
+    Used to populate the autocomplete list in /zeus-set-mission.
+
+    TODO: Return list[discord.OptionChoice] instead?
+    """
+    return ctx.bot.reforger_confgen.list_missions()
 
 
 class ZeusUpload(commands.Cog):
     """ZeusUpload cog for handling mission uploads"""
 
-    def __init__(self, bot: discord.Bot, config: ZeusopsBotConfig):
+    def __init__(self, bot: "ZeusopsBot", reforger_confgen: ReforgerConfigGenerator):
         """Initialise the cog"""
         self.bot = bot
-        self.config = config
-        self.reforger_confgen = ReforgerConfigGenerator(
-            base_config_file=config.reforger.reference_config,
-            target_folder=config.reforger.config_folder,
-        )
+        self.reforger_confgen = reforger_confgen
 
     @commands.slash_command(name="zeus-upload")
     @discord.option(
@@ -91,7 +102,16 @@ class ZeusUpload(commands.Cog):
         await ctx.respond(f"Mission uploaded successfully under {path=}")
 
     @commands.slash_command(name="zeus-set-mission")
-    async def zeus_set_mission(self, ctx: discord.ApplicationContext, filename: str):
+    @option(
+        "filename",
+        description="Mission filename",
+        autocomplete=basic_autocomplete(_autocomplete_missions),
+    )
+    async def zeus_set_mission(
+        self,
+        ctx: discord.ApplicationContext,
+        filename: str,
+    ):
         """Activate the given a mission file as a Zeus"""
         try:
             self.reforger_confgen.zeus_set_mission(filename)
