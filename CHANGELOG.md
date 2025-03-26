@@ -5,6 +5,12 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Added
+
+- `/zeus-upload` command now accepts an optional modlist (JSON snippet exported
+  from Mod Presets menu in Reforger).
+- Command line flag `--debug` for enabling more verbose debug logging.
+
 ### Fixed
 
 - Uploaded missions are now pretty-printed, to make it reviewable.

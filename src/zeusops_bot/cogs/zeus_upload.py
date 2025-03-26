@@ -2,19 +2,24 @@
 
 import discord
 from discord.ext import commands
+from pydantic import TypeAdapter, ValidationError
 
 from zeusops_bot.errors import (
     ConfigFileInvalidJson,
     ConfigFileNotFound,
     ConfigPatchingError,
 )
-from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
+from zeusops_bot.models import ModDetail
+from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, extract_mods
+from zeusops_bot.settings import ZeusopsBotConfig
+
+modlist_typeadapter = TypeAdapter(list[ModDetail])
 
 
 class ZeusUpload(commands.Cog):
     """ZeusUpload cog for handling mission uploads"""
 
-    def __init__(self, bot, config):
+    def __init__(self, bot: discord.Bot, config: ZeusopsBotConfig):
         """Initialise the cog"""
         self.bot = bot
         self.config = config
@@ -24,31 +29,66 @@ class ZeusUpload(commands.Cog):
         )
 
     @commands.slash_command(name="zeus-upload")
+    @discord.option(
+        "modlist",
+        description="Modlist JSON exported from Reforger",
+        input_type=discord.SlashCommandOptionType.attachment,
+        required=False,
+    )
     async def zeus_upload(
-        self, ctx: discord.ApplicationContext, scenario_id: str, filename: str
+        self,
+        ctx: discord.ApplicationContext,
+        scenario_id: str,
+        filename: str,
+        modlist: discord.Attachment | None = None,
     ):
         """Upload a mission as a Zeus"""
-        try:  # TODO: How do we pass modlist != None
-            path = self.reforger_confgen.zeus_upload(
-                scenario_id, filename, modlist=None
+        extracted_mods = None
+        try:
+            if modlist is not None:
+                data = await modlist.read()
+                extracted_mods = extract_mods(data.decode())
+        except ConfigFileInvalidJson as e:
+            await ctx.respond(
+                "Failed to understand the attached modlist as JSON. "
+                "Check the file was exported from the workshop, "
+                "try confirming with an online validator like "
+                "<https://jsonlint.com/>.\n\n"
+                f"Parse error was:\n```\n{e}\n```"
             )
-            await ctx.respond(f"Mission uploaded successfully under {path=}")
+            return
+        except ValidationError as e:
+            await ctx.respond(
+                "Failed to understand the modlist given: valid JSON, "
+                "but not a list of mod objects (name/ID/optional-version). "
+                "Check the file was exported from the workshop.\n\n"
+                f"Error was:\n```\n{e}\n```"
+            )
+            return
+        try:
+            path = self.reforger_confgen.zeus_upload(
+                scenario_id, filename, modlist=extracted_mods
+            )
         except ConfigFileNotFound:
             await ctx.respond(
                 "Bot config error: the base config file could not be found"
-                " Tell the Techmins! Path was: "
-                + str(self.reforger_confgen.base_config)
+                f" Tell the Techmins! Path was: {self.reforger_confgen.base_config}"
             )
+            return
         except ConfigFileInvalidJson as e:
             await ctx.respond(
                 "Bot config error: the base config file is invalid JSON "
-                "Tell the Techmins! Error was: " + str(e)
+                "Tell the Techmins!\n\n"
+                f"Error was:\n```\n{e}\n```"
             )
+            return
         except ConfigPatchingError as e:
             await ctx.respond(
-                "Failed to patch your requested change over base config.\n"
-                f"Error was: {str(e)}"
+                "Failed to patch your requested change over base config.\n\n"
+                f"Error was:\n```\n{e}\n```"
             )
+            return
+        await ctx.respond(f"Mission uploaded successfully under {path=}")
 
     @commands.slash_command(name="zeus-set-mission")
     async def zeus_set_mission(self, ctx: discord.ApplicationContext, filename: str):
@@ -77,11 +117,11 @@ class ZeusUpload(commands.Cog):
                 f"Current mission: `{self.reforger_confgen.current_mission()}`"
             )
         except ConfigFileNotFound as e:
-            await ctx.respond(f"Could not find configured mission: {str(e)}")
+            await ctx.respond(f"Could not find configured mission: {e}")
 
     @commands.Cog.listener()
     async def on_application_command_error(
         self, ctx: discord.ApplicationContext, error: discord.DiscordException
     ):
         """Handles application command errors that are not caught elsewhere"""
-        await ctx.respond(f"Unhandled exception: {error}")
+        await ctx.respond(f"Unhandled exception: \n\nError was: {error}")
