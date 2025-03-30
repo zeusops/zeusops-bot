@@ -46,12 +46,18 @@ class ZeusUpload(commands.Cog):
         input_type=discord.SlashCommandOptionType.attachment,
         required=False,
     )
+    @discord.option(
+        "activate",
+        description="Immediately use this uploaded mission as the active mission",
+        required=False,
+    )
     async def zeus_upload(
         self,
         ctx: discord.ApplicationContext,
         scenario_id: str,
         filename: str,
         modlist: discord.Attachment | None = None,
+        activate: bool = False,
     ):
         """Upload a mission as a Zeus"""
         extracted_mods = None
@@ -78,7 +84,7 @@ class ZeusUpload(commands.Cog):
             return
         try:
             path = self.reforger_confgen.zeus_upload(
-                scenario_id, filename, modlist=extracted_mods
+                scenario_id, filename, modlist=extracted_mods, activate=activate
             )
         except ConfigFileNotFound:
             await ctx.respond(

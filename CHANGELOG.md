@@ -5,6 +5,11 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Added
+
+- New optional argument `activate` to `/zeus-upload`. If set to true, the
+  uploaded mission is automatically set as the active config.
+
 ## v0.5.0 - 2025-03-26
 
 ### Added
