@@ -51,6 +51,13 @@ class ZeusUpload(commands.Cog):
         description="Immediately use this uploaded mission as the active mission",
         required=False,
     )
+    @discord.option(
+        "keep_versions",
+        description=(
+            "Prevent version numbers from being removed from the uploaded modlist"
+        ),
+        required=False,
+    )
     async def zeus_upload(
         self,
         ctx: discord.ApplicationContext,
@@ -58,13 +65,16 @@ class ZeusUpload(commands.Cog):
         filename: str,
         modlist: discord.Attachment | None = None,
         activate: bool = False,
+        keep_versions: bool = True,
     ):
         """Upload a mission as a Zeus"""
         extracted_mods = None
         try:
             if modlist is not None:
                 data = await modlist.read()
-                extracted_mods = extract_mods(data.decode())
+                extracted_mods = extract_mods(
+                    data.decode(), keep_versions=keep_versions
+                )
         except ConfigFileInvalidJson as e:
             await ctx.respond(
                 "Failed to understand the attached modlist as JSON. "

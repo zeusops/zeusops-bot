@@ -9,6 +9,9 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 - New optional argument `activate` to `/zeus-upload`. If set to true, the
   uploaded mission is automatically set as the active config.
+- Version numbers are automatically removed from the uploaded modlist. A new
+  optional argument `keep_versions=False` for `/zeus-upload` can be used to
+  preserve the version numbers.
 
 ## v0.5.0 - 2025-03-26
 
