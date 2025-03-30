@@ -14,6 +14,11 @@ Scenario: Upload next mission
   Then a new server config file is created
   And the config file is patched with <modlist.json> and <scenarioId>
 
+Scenario: Upload next mission and activate
+  Given a Zeusops mission locally ready
+  When Zeus calls "/zeus-upload" with the activate flag
+  Then the server config file is set as the active mission
+
 Scenario: Upload next mission without modlist
   Given a Zeusops mission locally ready
   When Zeus calls "/zeus-upload"

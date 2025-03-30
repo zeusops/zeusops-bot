@@ -38,6 +38,7 @@ class ReforgerConfigGenerator:
         scenario_id: str,
         filename: str,
         modlist: list[ModDetail] | None,
+        activate: bool = False,
     ) -> Path:
         """Convert a modlist+scenario into a file on server at given path
 
@@ -45,6 +46,8 @@ class ReforgerConfigGenerator:
           scenario_id: The scenarioID to load within the modlist (selects mission)
           filename: The filename to store the resulting file under
           modlist: The exhaustive list of mods to load, or None to mean no change needed
+          activate: If set to true, the added config is immediately set as the
+                    currently active config
 
         Returns:
           Path: Path to the file generated on filesystem, under {py:attr}`target_folder`
