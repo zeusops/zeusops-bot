@@ -37,7 +37,6 @@ def test_upload_edits_files(base_config: Path, mission_dir: Path, activate: bool
     assert config["game"]["mods"][0] == MODLIST_DICT[0]
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_upload_activate_mission(base_config: Path, mission_dir: Path):
     """Scenario: Upload next mission and activate"""
     # Given a Zeusops mission locally ready
