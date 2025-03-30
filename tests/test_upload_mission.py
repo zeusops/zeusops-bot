@@ -23,14 +23,7 @@ from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, extract_mod
 
 @pytest.mark.parametrize(
     "keep_versions,mods",
-    [
-        (False, MODLIST_DICT),
-        pytest.param(
-            True,
-            MODLIST_DICT_VERSIONLESS,
-            marks=pytest.mark.xfail(reason="Not implemented"),
-        ),
-    ],
+    [(False, MODLIST_DICT_VERSIONLESS), (True, MODLIST_DICT)],
     ids=["strip versions", "keep versions"],
 )
 @pytest.mark.parametrize("activate", (False, True), ids=["no activate", "activate"])

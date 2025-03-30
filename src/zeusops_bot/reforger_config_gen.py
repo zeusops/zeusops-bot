@@ -178,7 +178,7 @@ def extract_mods(modlist: str | None, keep_versions=False) -> list[ModDetail] | 
         return None
     modlist = f"[{modlist}]"
     try:
-        return modlist_typeadapter.validate_json(modlist)
+        mods = modlist_typeadapter.validate_json(modlist)
     except ValidationError as e:
         errors = e.errors()
         if len(errors) > 1:
@@ -191,3 +191,9 @@ def extract_mods(modlist: str | None, keep_versions=False) -> list[ModDetail] | 
             case _:
                 # Unknown error
                 raise e
+
+    if not keep_versions:
+        for mod in mods:
+            del mod["version"]
+
+    return mods
