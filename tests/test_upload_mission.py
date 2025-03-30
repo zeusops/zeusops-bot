@@ -7,24 +7,24 @@ Feature: Upload mission
 """
 
 import json
+from pathlib import Path
 
 from tests.fixtures import BASE_CONFIG, MODLIST_DICT, MODLIST_JSON
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, extract_mods
 
 
-def test_upload_edits_files(tmp_path):
+def test_upload_edits_files(base_config: Path, mission_dir: Path):
     """Scenario: Upload next mission creates file"""
     # Given a Zeusops mission locally ready
     # And Zeus specifies <modlist.json>, <scenarioId>, <filename>
     scenario_id = "cool-scenario-1"
     filename = "Jib_20250228"
-    dest = tmp_path / "data"
-    source_file = tmp_path / "source.json"
-    source_file.write_text(json.dumps(BASE_CONFIG))
-    gen = ReforgerConfigGenerator(base_config_file=source_file, target_folder=dest)
+    config_gen = ReforgerConfigGenerator(
+        base_config_file=base_config, target_folder=mission_dir
+    )
     # When Zeus calls "/zeus-upload"
     modlist = extract_mods(MODLIST_JSON)
-    out_path = gen.zeus_upload(scenario_id, filename, modlist)
+    out_path = config_gen.zeus_upload(scenario_id, filename, modlist)
     # Then a new server config file is created
     assert out_path.is_file(), "Should have generated a file on disk"
     # And the config file is patched with <modlist.json> and <scenarioId>
@@ -34,18 +34,19 @@ def test_upload_edits_files(tmp_path):
     assert config["game"]["mods"][0] == MODLIST_DICT[0]
 
 
-def test_upload_edits_files_without_modlist(tmp_path):
+def test_upload_edits_files_without_modlist(base_config: Path, mission_dir: Path):
     """Scenario: Upload next mission without modlist"""
     # Given a Zeusops mission locally ready
     # And Zeus specifies <scenarioId>, <filename>
     scenario_id = "cool-scenario-1"
     filename = "Jib_20250228"
-    dest = tmp_path / "data"
-    source_file = tmp_path / "source.json"
-    source_file.write_text(json.dumps(BASE_CONFIG))
-    gen = ReforgerConfigGenerator(base_config_file=source_file, target_folder=dest)
+    config_gen = ReforgerConfigGenerator(
+        base_config_file=base_config, target_folder=mission_dir
+    )
     # When Zeus calls "/zeus-upload"
-    out_path = gen.zeus_upload(scenario_id=scenario_id, filename=filename, modlist=None)
+    out_path = config_gen.zeus_upload(
+        scenario_id=scenario_id, filename=filename, modlist=None
+    )
     # Then a new server config file is created
     assert out_path.is_file(), "Should have generated a file on disk"
     # And the config file is patched with just <scenarioId>

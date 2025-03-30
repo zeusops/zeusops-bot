@@ -1,5 +1,5 @@
 """Configure tests"""
 
-from tests.fixtures import config_gen, mission_dir
+from tests.fixtures import base_config, mission_dir
 
-__all__ = ["mission_dir", "config_gen"]
+__all__ = ["mission_dir", "base_config"]
