@@ -11,12 +11,36 @@ from pathlib import Path
 
 import pytest
 
-from tests.fixtures import BASE_CONFIG, MODLIST_DICT, MODLIST_JSON
+from tests.fixtures import (
+    BASE_CONFIG,
+    MODLIST_DICT,
+    MODLIST_DICT_VERSIONLESS,
+    MODLIST_JSON,
+)
+from zeusops_bot.models import ModDetail
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, extract_mods
 
 
-@pytest.mark.parametrize("activate", (False, True))
-def test_upload_edits_files(base_config: Path, mission_dir: Path, activate: bool):
+@pytest.mark.parametrize(
+    "keep_versions,mods",
+    [
+        (False, MODLIST_DICT),
+        pytest.param(
+            True,
+            MODLIST_DICT_VERSIONLESS,
+            marks=pytest.mark.xfail(reason="Not implemented"),
+        ),
+    ],
+    ids=["strip versions", "keep versions"],
+)
+@pytest.mark.parametrize("activate", (False, True), ids=["no activate", "activate"])
+def test_upload_edits_files(
+    base_config: Path,
+    mission_dir: Path,
+    activate: bool,
+    keep_versions: bool,
+    mods: list[ModDetail],
+):
     """Scenario: Upload next mission creates file"""
     # Given a Zeusops mission locally ready
     # And Zeus specifies <modlist.json>, <scenarioId>, <filename>
@@ -26,7 +50,7 @@ def test_upload_edits_files(base_config: Path, mission_dir: Path, activate: bool
         base_config_file=base_config, target_folder=mission_dir
     )
     # When Zeus calls "/zeus-upload"
-    modlist = extract_mods(MODLIST_JSON)
+    modlist = extract_mods(MODLIST_JSON, keep_versions)
     out_path = config_gen.zeus_upload(scenario_id, filename, modlist, activate)
     # Then a new server config file is created
     assert out_path.is_file(), "Should have generated a file on disk"
@@ -34,7 +58,7 @@ def test_upload_edits_files(base_config: Path, mission_dir: Path, activate: bool
     config = json.loads(out_path.read_text())
     assert config["game"]["scenarioId"] == scenario_id, "Should update scenarioId"
     assert isinstance(config["game"]["mods"], list)
-    assert config["game"]["mods"][0] == MODLIST_DICT[0]
+    assert config["game"]["mods"][0] == mods[0]
 
 
 def test_upload_activate_mission(base_config: Path, mission_dir: Path):

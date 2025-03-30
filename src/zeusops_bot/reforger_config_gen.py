@@ -158,13 +158,14 @@ def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) 
     return mod
 
 
-def extract_mods(modlist: str | None) -> list[ModDetail] | None:
+def extract_mods(modlist: str | None, keep_versions=False) -> list[ModDetail] | None:
     """Extracts a list of ModDetail entries from a mod list exported from Reforger
 
     Args:
       modlist: A partial JSON string of mods to extract. Can be None if the
                user did not provide any mods, in which case the operation is a
                no-op.
+      keep_versions: Preserve mod versions in the extracted list of mods.
 
     Raises:
       pydantic.ValidationError: Generic error in validating the mod list

@@ -13,6 +13,14 @@ Scenario: Upload next mission
   And Zeus specifies <modlist.json>, <scenarioId>, <filename>
   Then a new server config file is created
   And the config file is patched with <modlist.json> and <scenarioId>
+  And the version numbers are removed from the mods.
+
+Scenario: Upload next mission with versions retained
+  Given a Zeusops mission locally ready
+  When Zeus calls "/zeus-upload" with "keep_versions=True"
+  Then a new server config file is created
+  And the config file is patched with <modlist.json> and <scenarioId>
+  And the version numbers are kept as-is.
 
 Scenario: Upload next mission and activate
   Given a Zeusops mission locally ready

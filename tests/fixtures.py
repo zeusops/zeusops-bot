@@ -22,6 +22,12 @@ MODLIST_DICT: list[ModDetail] = [
     {"modId": "60EAEA0389DB3CC2", "name": "ACE Trenches", "version": "1.2.0"},
 ]
 
+MODLIST_DICT_VERSIONLESS: list[ModDetail] = [
+    {"modId": "595F2BF2F44836FB", "name": "RHS - Status Quo"},
+    {"modId": "5EB744C5F42E0800", "name": "ACE Chopping"},
+    {"modId": "60EAEA0389DB3CC2", "name": "ACE Trenches"},
+]
+
 # NOTE: These two formats are not 100% equivalent: Reforger exports the mods in
 # a JSON list, but doesn't actually include the outer [] in the exported
 # string, because the data is meant to be pasted directly inside the
