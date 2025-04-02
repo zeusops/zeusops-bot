@@ -5,7 +5,6 @@ import typing
 import discord
 from discord.commands import option
 from discord.ext import commands
-from discord.utils import basic_autocomplete
 from pydantic import TypeAdapter, ValidationError
 
 if typing.TYPE_CHECKING:
@@ -28,7 +27,11 @@ def _autocomplete_missions(ctx: discord.AutocompleteContext) -> list[str]:
 
     TODO: Return list[discord.OptionChoice] instead?
     """
-    return ctx.bot.reforger_confgen.list_missions()
+    return [
+        mission
+        for mission in ctx.bot.reforger_confgen.list_missions()
+        if ctx.value.lower() in mission.lower()
+    ]
 
 
 class ZeusUpload(commands.Cog):
@@ -121,7 +124,7 @@ class ZeusUpload(commands.Cog):
     @option(
         "filename",
         description="Mission filename",
-        autocomplete=basic_autocomplete(_autocomplete_missions),
+        autocomplete=_autocomplete_missions,
     )
     async def zeus_set_mission(
         self,
