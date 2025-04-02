@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
+from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, as_config_file
 
 
 @pytest.mark.parametrize(
@@ -27,15 +27,18 @@ from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
     ids=["two missions", "empty", "non-json extra"],
 )
 def test_list_missions(
+    base_config: Path,
     mission_dir: Path,
-    config_gen: ReforgerConfigGenerator,
     filenames: list[str],
     mission_names: list[str],
 ):
     """Scenario: List uploaded missions"""
     # Given files "mission1.json" and "mission2.json" exist in the mission directory
     for filename in filenames:
-        (mission_dir / filename).with_suffix(".json").touch()
+        as_config_file(mission_dir, filename).touch()
+    config_gen = ReforgerConfigGenerator(
+        base_config_file=base_config, target_folder=mission_dir
+    )
     # When Zeus calls "/zeus-list"
     result: list[str] = config_gen.list_missions()
     # Then a list of mission names is returned

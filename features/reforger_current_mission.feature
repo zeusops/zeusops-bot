@@ -11,3 +11,9 @@ Scenario: Show currently active mission
   And "mission1.json" is set as the active mission
   When Zeus calls "/current-mission"
   Then "mission1" is displayed
+
+Scenario: Broken mission link produces an error
+  Given "mission1.json" is set as the active mission
+  And file "mission1.json" does not exist in the mission directory
+  When Zeus calls "/current-mission"
+  Then an error about a missing config is raised
