@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, as_config_file
+from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator
 
 
 @pytest.mark.parametrize(
@@ -18,11 +18,7 @@ from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, as_config_f
     [
         (["mission1.json", "mission2.json"], ["mission1", "mission2"]),
         ([], []),
-        pytest.param(
-            ["mission1.json", "mission2.json", ".gitignore"],
-            ["mission1", "mission2"],
-            marks=pytest.mark.xfail(reason="GH#11"),
-        ),
+        (["mission1.json", "mission2.json", ".gitignore"], ["mission1", "mission2"]),
     ],
     ids=["two missions", "empty", "non-json extra"],
 )
@@ -35,7 +31,7 @@ def test_list_missions(
     """Scenario: List uploaded missions"""
     # Given files "mission1.json" and "mission2.json" exist in the mission directory
     for filename in filenames:
-        as_config_file(mission_dir, filename).touch()
+        (mission_dir / filename).touch()
     config_gen = ReforgerConfigGenerator(
         base_config_file=base_config, target_folder=mission_dir
     )
