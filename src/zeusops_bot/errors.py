@@ -8,30 +8,30 @@ class ZeusopsBotException(Exception):
 
 
 class ZeusopsBotConfigException(ZeusopsBotException):
-    """The bot's config itself is wrong somehow"""
+    """The Discord bot config itself is wrong somehow"""
 
     pass
 
 
 class BadConfigFileException(ZeusopsBotException):
-    """The config file given is incorrect somehow"""
+    """The Reforger config file given is incorrect somehow"""
 
     pass
 
 
 class ConfigFileNotFound(BadConfigFileException):
-    """The config file was not found at given path"""
+    """The Reforger config file was not found at given path"""
 
     pass
 
 
 class ConfigFileInvalidJson(BadConfigFileException):
-    """The config file was found but isn't valid JSON"""
+    """The Reforger config file was found but isn't valid JSON"""
 
     pass
 
 
 class ConfigPatchingError(BadConfigFileException):
-    """The config file patching didn't work"""
+    """The Reforger config file patching didn't work"""
 
     pass

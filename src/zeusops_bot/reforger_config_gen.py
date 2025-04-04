@@ -24,7 +24,12 @@ class ReforgerConfigGenerator:
     """Manages Arma Reforger config.json for variations of modlist/scenario"""
 
     def __init__(self, base_config_file: Path, target_folder: Path):
-        """Instantiate a config generator with the base config to use"""
+        """Instantiate a config generator with the base config to use
+
+        Args:
+          base_config_file: The filename of a reference Reforger config
+          target_folder: The folder to place generated config files in
+        """
         self.base_config = base_config_file
         self.target_dest = target_folder
 
@@ -109,6 +114,10 @@ class ReforgerConfigGenerator:
 
         Returns:
           Currently active mission name
+
+        Raises:
+          ConfigFileNotFound: Mission symlink was found but points to a
+                              non-existent mission.
         """
         symlink_path = self.target_dest / SYMLINK_FILENAME
         target = symlink_path.readlink()
@@ -145,7 +154,20 @@ def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) 
 
 
 def extract_mods(modlist: str | None) -> list[ModDetail] | None:
-    """Extracts a list of ModDetail entries from a mod list exported from Reforger."""
+    """Extracts a list of ModDetail entries from a mod list exported from Reforger
+
+    Args:
+      modlist: A partial JSON string of mods to extract. Can be None if the
+               user did not provide any mods, in which case the operation is a
+               no-op.
+
+    Raises:
+      pydantic.ValidationError: Generic error in validating the mod list
+      ConfigFileInvalidJson: The input was not valid JSON
+
+    Returns:
+      A list of ModDetail, or None if the input was None.
+    """
     if modlist is None:
         return None
     modlist = f"[{modlist}]"
