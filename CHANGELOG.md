@@ -5,6 +5,8 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+## v0.6.0 - 2025-04-06
+
 ### Added
 
 - New optional argument `activate` to `/zeus-upload`. If set to true, the
