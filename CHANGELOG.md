@@ -13,6 +13,12 @@ The project uses semantic versioning (see [semver](https://semver.org)).
   optional argument `keep_versions=False` for `/zeus-upload` can be used to
   preserve the version numbers.
 
+### Changed
+
+- Autocompletion in `/zeus-set-mission` now matches everywhere in the mission
+  name, not just the beginning. This makes it easier to search based on Zeus
+  name, for example.
+
 ## v0.5.0 - 2025-03-26
 
 ### Added
