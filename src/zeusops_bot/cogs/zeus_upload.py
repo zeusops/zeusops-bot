@@ -22,7 +22,8 @@ modlist_typeadapter = TypeAdapter(list[ModDetail])
 def _autocomplete_missions(ctx: discord.AutocompleteContext) -> list[str]:
     """List known missions
 
-    Used to populate the autocomplete list in /zeus-set-mission.
+    Used to populate the autocomplete list in /zeus-set-mission and
+    /zeus-upload.
 
     TODO: Return list[discord.OptionChoice] instead?
     """
@@ -42,6 +43,13 @@ class ZeusUpload(commands.Cog):
         self.reforger_confgen = reforger_confgen
 
     @commands.slash_command(name="zeus-upload")
+    @discord.option(
+        "filename",
+        description=(
+            "Mission filename. Choose an existing filename to update the mission."
+        ),
+        autocomplete=_autocomplete_missions,
+    )
     @discord.option(
         "modlist",
         description="Modlist JSON exported from Reforger",

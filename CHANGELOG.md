@@ -5,6 +5,10 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 
 ## [Unreleased]
 
+### Added
+
+- `/zeus-upload` now autocompletes existing mission filenames.
+
 ## v0.6.0 - 2025-04-06
 
 ### Added
