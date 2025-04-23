@@ -55,6 +55,7 @@ addopts = """-vv \
       --cov-report=html:test_results/coverage.html \
       --cov-report=term \
       --junit-xml=test_results/results.xml"""
+xfail_strict = true
 
 [tool.coverage.run]
 omit = [
