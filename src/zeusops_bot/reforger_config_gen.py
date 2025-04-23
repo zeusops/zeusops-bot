@@ -35,19 +35,21 @@ class ReforgerConfigGenerator:
 
     def zeus_upload(
         self,
-        scenario_id: str,
         filename: str,
-        modlist: list[ModDetail] | None,
+        scenario_id: str | None = None,
+        modlist: list[ModDetail] | None = None,
         activate: bool = False,
     ) -> Path:
         """Convert a modlist+scenario into a file on server at given path
 
         Args:
-          scenario_id: The scenarioID to load within the modlist (selects mission)
           filename: The filename to store the resulting file under
+          scenario_id: The scenarioID to load within the modlist (selects
+                mission). If set to None, will be automatically fetched from the
+                file based on the filename.
           modlist: The exhaustive list of mods to load, or None to mean no change needed
           activate: If set to true, the added config is immediately set as the
-                    currently active config
+                currently active config
 
         Returns:
           Path: Path to the file generated on filesystem, under {py:attr}`target_folder`
@@ -58,6 +60,8 @@ class ReforgerConfigGenerator:
           ConfigPatchingError: Patching of the file failed, sending lib exception as arg
 
         """
+        if scenario_id is None:
+            raise NotImplementedError
         # Ensure parent folder exists
         self.target_dest.mkdir(parents=True, exist_ok=True)
         # Read the original config file

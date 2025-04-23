@@ -33,3 +33,15 @@ Scenario: Upload next mission without modlist
   And Zeus specifies <scenarioId>, <filename>
   Then a new server config file is created
   And the config file is patched with just <scenarioId>
+
+Scenario: Update modlist of an existing mission
+  Given a Zeusops mission uploaded previously
+  When Zeus calls "/zeus-upload" with an existing filename
+  And Zeus specifies <modlist.json>
+  Then the scenario ID is deduced automatically from the existing config
+  And the existing config is updated with the new mods.
+
+Scenario: Not providing a scenario ID for a new mission produces an error
+  When Zeus calls "/zeus-upload" with a new filename
+  And Zeus does not specify <scenarioId>
+  Then an error about a missing mission is raised.
