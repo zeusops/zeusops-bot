@@ -68,9 +68,9 @@ def test_upload_activate_mission(base_config: Path, mission_dir: Path):
     )
     # Then the server config file is set as the active mission
     target = mission_dir / "current-config.json"
-    assert target.readlink() == out_path.relative_to(
-        mission_dir
-    ), "Target should point to uploaded file"
+    assert target.readlink() == out_path.relative_to(mission_dir), (
+        "Target should point to uploaded file"
+    )
 
 
 def test_upload_edits_files_without_modlist(base_config: Path, mission_dir: Path):
@@ -93,7 +93,6 @@ def test_upload_edits_files_without_modlist(base_config: Path, mission_dir: Path
     assert config["game"]["mods"] == BASE_CONFIG["game"]["mods"], "Should keep modlist"
 
 
-@pytest.mark.xfail(raises=NotImplementedError)
 def test_upload_existing_filename_without_scenarioid(
     base_config: Path, mission_dir: Path
 ):
@@ -118,7 +117,6 @@ def test_upload_existing_filename_without_scenarioid(
     assert config["game"]["mods"] == MODLIST_DICTS, "Should update modlist"
 
 
-@pytest.mark.xfail(raises=NotImplementedError)
 def test_upload_no_scenarioid_without_file_fails(base_config: Path, mission_dir: Path):
     """Scenario: Not providing a scenario ID for a new mission produces an error"""
     # When Zeus calls "/zeus-upload" with a new filename

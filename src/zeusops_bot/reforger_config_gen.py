@@ -4,13 +4,17 @@ import json
 from pathlib import Path
 
 import jsonpatch
-from pydantic import TypeAdapter, ValidationError
+from pydantic import ValidationError
 
 from zeusops_bot import errors
 from zeusops_bot.errors import ConfigFileInvalidJson
-from zeusops_bot.models import ModDetail
-
-modlist_typeadapter = TypeAdapter(list["ModDetail"])
+from zeusops_bot.models import (
+    ConfigFile,
+    ModDetail,
+    TypedTypeAdapter,
+    configfile_typeadapter,
+    modlist_typeadapter,
+)
 
 SYMLINK_FILENAME = "current-config.json"
 
@@ -55,24 +59,34 @@ class ReforgerConfigGenerator:
           Path: Path to the file generated on filesystem, under {py:attr}`target_folder`
 
         Raises:
-          ConfigFileNotFound: Base config file not found at all
+          ConfigFileNotFound: Base config file not found at all or trying to
+                update a non-existent mission config file
           ConfigFileInvalidJson: Base config file doesn't decode as valid JSON
           ConfigPatchingError: Patching of the file failed, sending lib exception as arg
 
         """
-        if scenario_id is None:
-            raise NotImplementedError
+        target_filepath = as_config_file(self.target_dest, filename)
+        if scenario_id is None and not target_filepath.is_file():
+            raise errors.ConfigFileNotFound(
+                "Cannot detect scenario ID automatically: mission config "
+                f"{target_filepath} does not exist"
+            )
+
         # Ensure parent folder exists
         self.target_dest.mkdir(parents=True, exist_ok=True)
         # Read the original config file
-        if not self.base_config.is_file():
-            raise errors.ConfigFileNotFound(self.base_config)
         try:
-            base_config_content = json.loads(self.base_config.read_text())
-        except json.JSONDecodeError as e:
-            raise errors.ConfigFileInvalidJson(e)
+            base_config_content = load_config(self.base_config)
+        except errors.ConfigFileNotFound as e:
+            raise errors.ConfigFileNotFound(
+                "Bot config error: the base config file could not be found. "
+                f"Tell the Techmins! Path was: {self.base_config}"
+            ) from e
+
+        if scenario_id is None:
+            data = load_config(target_filepath)
+            scenario_id = data["game"]["scenarioId"]
         modded_config_dict = patch_file(base_config_content, modlist, scenario_id)
-        target_filepath = as_config_file(self.target_dest, filename)
         # Create the file itself
         target_filepath.write_text(json.dumps(modded_config_dict, indent=4))
         if activate:
@@ -137,7 +151,9 @@ class ReforgerConfigGenerator:
         return target.stem
 
 
-def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) -> dict:
+def patch_file(
+    source: ConfigFile, modlist: list[ModDetail] | None, scenario_id: str
+) -> dict:
     """Edit the content of source with new modlist and scenarioID
 
     >>> modlist=[{"modId": "1", "name":"mod1"}]
@@ -162,8 +178,38 @@ def patch_file(source: dict, modlist: list[ModDetail] | None, scenario_id: str) 
     return mod
 
 
+def load_json[T](adapter: TypedTypeAdapter[T], data: str) -> T:
+    """Load and validate data from JSON
+
+    Args:
+      adapter: A TypeAdapter for loading the data
+      data: A JSON string containing the data to be loaded
+
+    Raises:
+      pydantic.ValidationError: Generic error in validating the data
+      ConfigFileInvalidJson: The input was not valid JSON
+
+    Returns:
+      Loaded data, as described by the TypeAdapter
+    """
+    try:
+        return adapter.validate_json(data)
+    except ValidationError as e:
+        errors = e.errors()
+        if len(errors) > 1:
+            # Got more than 1 error, not our problem
+            raise e
+        error = errors[0]
+        match error["type"]:
+            case "json_invalid":
+                raise ConfigFileInvalidJson(e)
+            case _:
+                # Unknown error
+                raise e
+
+
 def extract_mods(modlist: str | None, keep_versions=False) -> list[ModDetail] | None:
-    """Extracts a list of ModDetail entries from a mod list exported from Reforger
+    """Extract a list of ModDetail entries from a mod list exported from Reforger
 
     Args:
       modlist: A partial JSON string of mods to extract. Can be None if the
@@ -181,23 +227,32 @@ def extract_mods(modlist: str | None, keep_versions=False) -> list[ModDetail] | 
     if modlist is None:
         return None
     modlist = f"[{modlist}]"
-    try:
-        mods = modlist_typeadapter.validate_json(modlist)
-    except ValidationError as e:
-        errors = e.errors()
-        if len(errors) > 1:
-            # Got more than 1 error, not our problem
-            raise e
-        error = errors[0]
-        match error["type"]:
-            case "json_invalid":
-                raise ConfigFileInvalidJson(e)
-            case _:
-                # Unknown error
-                raise e
+    mods = load_json(modlist_typeadapter, modlist)
 
     if not keep_versions:
         for mod in mods:
             del mod["version"]
 
     return mods
+
+
+def load_config(config: Path | str) -> ConfigFile:
+    """Load a ConfigFile from JSON
+
+    Args:
+      config: Either a path to the config or a string containing the config to
+              be loaded.
+
+    Raises:
+      pydantic.ValidationError: Generic error in validating the mod list
+      ConfigFileInvalidJson: The input was not valid JSON
+      ConfigFileNotFound: The config file could not be found
+
+    Returns:
+      The loaded ConfigFile.
+    """
+    if isinstance(config, Path):
+        if not config.is_file():
+            raise errors.ConfigFileNotFound(config)
+        config = config.read_text()
+    return load_json(configfile_typeadapter, config)

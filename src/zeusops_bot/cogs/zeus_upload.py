@@ -51,6 +51,15 @@ class ZeusUpload(commands.Cog):
         autocomplete=_autocomplete_missions,
     )
     @discord.option(
+        "scenario_id",
+        description=(
+            "Workshop ID for the scenario. Not required "
+            "updating an existing mission config"
+        ),
+        input_type=str,
+        required=False,
+    )
+    @discord.option(
         "modlist",
         description="Modlist JSON exported from Reforger",
         input_type=discord.SlashCommandOptionType.attachment,
@@ -72,7 +81,7 @@ class ZeusUpload(commands.Cog):
         self,
         ctx: discord.ApplicationContext,
         filename: str,
-        scenario_id: str,
+        scenario_id: str | None = None,
         modlist: discord.Attachment | None = None,
         activate: bool = False,
         keep_versions: bool = True,
@@ -106,11 +115,8 @@ class ZeusUpload(commands.Cog):
             path = self.reforger_confgen.zeus_upload(
                 filename, scenario_id, modlist=extracted_mods, activate=activate
             )
-        except ConfigFileNotFound:
-            await ctx.respond(
-                "Bot config error: the base config file could not be found"
-                f" Tell the Techmins! Path was: {self.reforger_confgen.base_config}"
-            )
+        except ConfigFileNotFound as e:
+            await ctx.respond(f"Config file not found. Error was: \n ```\n{e}\n```")
             return
         except ConfigFileInvalidJson as e:
             await ctx.respond(

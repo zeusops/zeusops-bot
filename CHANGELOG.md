@@ -8,6 +8,9 @@ The project uses semantic versioning (see [semver](https://semver.org)).
 ### Added
 
 - `/zeus-upload` now autocompletes existing mission filenames.
+- When updating an existing mission with `/zeus-upload`, the `scenario_id`
+  parameter is optional and will be automatically deduced from the existing
+  mission config.
 
 ## v0.6.0 - 2025-04-06
 
