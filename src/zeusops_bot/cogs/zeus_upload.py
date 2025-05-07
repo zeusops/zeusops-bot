@@ -3,7 +3,6 @@
 import typing
 
 import discord
-from discord.commands import option
 from discord.ext import commands
 from pydantic import TypeAdapter, ValidationError
 
@@ -121,7 +120,7 @@ class ZeusUpload(commands.Cog):
         await ctx.respond(f"Mission uploaded successfully under {path=}")
 
     @commands.slash_command(name="zeus-set-mission")
-    @option(
+    @discord.option(
         "filename",
         description="Mission filename",
         autocomplete=_autocomplete_missions,
