@@ -5,7 +5,7 @@ on:
   push:
 
 env:
-  IMAGE_TAG: ghcr.io/${{ github.repository_owner }}/zeusops-bot:latest
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/zeusops-bot:latest
 
 jobs:
   build:
@@ -50,7 +50,7 @@ jobs:
         run: docker load < image.tar.gz
       - name: lowercase repo
         run: |
-          echo "IMAGE_TAG_LOWER=${IMAGE_TAG@L}" >> "${GITHUB_ENV}"
+          echo "IMAGE_TAG_LOWER=${IMAGE_NAME@L}:latest" >> "${GITHUB_ENV}"
       - name: Tag Image
         run: docker tag zeusops-bot "$IMAGE_TAG_LOWER"
       - name: Push Image
