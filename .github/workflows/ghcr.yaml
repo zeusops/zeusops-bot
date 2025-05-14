@@ -37,6 +37,9 @@ jobs:
       - name: Get Current Pull Request
         uses: 8BitJonny/gh-get-current-pr@3.0.0
         id: PR
+      - run: "echo pr_found: ${found}"
+        env:
+          found: ${{ toJSON(fromJSON(steps.PR.outputs.pr_found)) }}
       - run: echo "PR ${prNumber} ${prTitle} at ${prUrl} is ${prJSON}"
         if: steps.PR.outputs.pr_found == 'true'
         env:
