@@ -16,13 +16,13 @@ BASE_CONFIG: ConfigFile = {
     }
 }
 
-MODLIST_DICT: list[ModDetail] = [
+MODLIST_DICTS: list[ModDetail] = [
     {"modId": "595F2BF2F44836FB", "name": "RHS - Status Quo", "version": "0.10.4075"},
     {"modId": "5EB744C5F42E0800", "name": "ACE Chopping", "version": "1.2.0"},
     {"modId": "60EAEA0389DB3CC2", "name": "ACE Trenches", "version": "1.2.0"},
 ]
 
-MODLIST_DICT_VERSIONLESS: list[ModDetail] = [
+MODLIST_DICTS_VERSIONLESS: list[ModDetail] = [
     {"modId": "595F2BF2F44836FB", "name": "RHS - Status Quo"},
     {"modId": "5EB744C5F42E0800", "name": "ACE Chopping"},
     {"modId": "60EAEA0389DB3CC2", "name": "ACE Trenches"},

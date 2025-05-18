@@ -76,8 +76,8 @@ def reforger_upload(
     base_config_file: Path,
     target_folder: Path,
     modlist: list[ModDetail] | None,
-    scenario_id: str,
     filename: str,
+    scenario_id: str | None = None,
 ):
     """Run the program's /zeus-upload command"""
     conf_generator = cmd.ReforgerConfigGenerator(base_config_file, target_folder)
@@ -85,6 +85,6 @@ def reforger_upload(
         print(f"Loading {len(modlist)} mods, for {scenario_id=}...")
     else:
         print(f"Loading {scenario_id=}...")
-    out_path = conf_generator.zeus_upload(scenario_id, filename, modlist)
+    out_path = conf_generator.zeus_upload(filename, scenario_id, modlist)
     print(f"Saved under file {out_path.name}")
     return Exit.SUCCESS
