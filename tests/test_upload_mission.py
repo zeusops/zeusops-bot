@@ -67,9 +67,9 @@ def test_upload_activate_mission(base_config: Path, mission_dir: Path):
     )
     # Then the server config file is set as the active mission
     target = mission_dir / "current-config.json"
-    assert target.readlink() == out_path.relative_to(
-        mission_dir
-    ), "Target should point to uploaded file"
+    assert target.readlink() == out_path.relative_to(mission_dir), (
+        "Target should point to uploaded file"
+    )
 
 
 def test_upload_edits_files_without_modlist(base_config: Path, mission_dir: Path):

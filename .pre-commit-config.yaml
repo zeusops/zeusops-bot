@@ -31,7 +31,7 @@ repos:
     name: Hadolint (Dockerfile checker)
 # Actual Python Linters
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.11.9
+  rev: v0.11.11
   hooks:
   - id: ruff-format
   - id: ruff
@@ -45,6 +45,6 @@ repos:
     # Uncomment below if mypy requires extra type stub packages
     # additional_dependencies: [types-PyYAML==6.0.12.2]
 - repo: https://github.com/igorshubovych/markdownlint-cli
-  rev: v0.44.0
+  rev: v0.45.0
   hooks:
   - id: markdownlint-fix

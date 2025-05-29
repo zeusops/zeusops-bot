@@ -22,9 +22,9 @@ def test_load_mission(base_config: Path, mission_dir: Path):
     target = mission_dir / "current-config.json"
     assert target.exists(), "Should have created latest config symlink"
     assert target.is_symlink(), "Target config should be a symlink"
-    assert target.readlink() == uploaded_conf_path.relative_to(
-        mission_dir
-    ), "Target should point to uploaded file"
+    assert target.readlink() == uploaded_conf_path.relative_to(mission_dir), (
+        "Target should point to uploaded file"
+    )
 
 
 def test_load_mission_twice(base_config: Path, mission_dir: Path):
@@ -48,6 +48,6 @@ def test_load_mission_twice(base_config: Path, mission_dir: Path):
     target = mission_dir / "current-config.json"
     assert target.exists(), "Should have created latest config symlink"
     assert target.is_symlink(), "Target config should be a symlink"
-    assert target.readlink() == uploaded_conf_path2.relative_to(
-        mission_dir
-    ), "Target should point to latest mission set"
+    assert target.readlink() == uploaded_conf_path2.relative_to(mission_dir), (
+        "Target should point to latest mission set"
+    )
