@@ -13,17 +13,18 @@ import pytest
 
 from tests.fixtures import (
     BASE_CONFIG,
-    MODLIST_DICT,
-    MODLIST_DICT_VERSIONLESS,
+    MODLIST_DICTS,
+    MODLIST_DICTS_VERSIONLESS,
     MODLIST_JSON,
 )
+from zeusops_bot.errors import ConfigFileNotFound
 from zeusops_bot.models import ModDetail
 from zeusops_bot.reforger_config_gen import ReforgerConfigGenerator, extract_mods
 
 
 @pytest.mark.parametrize(
     "keep_versions,mods",
-    [(False, MODLIST_DICT_VERSIONLESS), (True, MODLIST_DICT)],
+    [(False, MODLIST_DICTS_VERSIONLESS), (True, MODLIST_DICTS)],
     ids=["strip versions", "keep versions"],
 )
 @pytest.mark.parametrize("activate", (False, True), ids=["no activate", "activate"])
@@ -44,7 +45,7 @@ def test_upload_edits_files(
     )
     # When Zeus calls "/zeus-upload"
     modlist = extract_mods(MODLIST_JSON, keep_versions)
-    out_path = config_gen.zeus_upload(scenario_id, filename, modlist, activate)
+    out_path = config_gen.zeus_upload(filename, scenario_id, modlist, activate)
     # Then a new server config file is created
     assert out_path.is_file(), "Should have generated a file on disk"
     # And the config file is patched with <modlist.json> and <scenarioId>
@@ -63,7 +64,7 @@ def test_upload_activate_mission(base_config: Path, mission_dir: Path):
     )
     modlist = extract_mods(MODLIST_JSON)
     out_path = config_gen.zeus_upload(
-        "cool-scenario-1", "Jib_20250228", modlist, activate=True
+        "Jib_20250228", "cool-scenario-1", modlist, activate=True
     )
     # Then the server config file is set as the active mission
     target = mission_dir / "current-config.json"
@@ -82,9 +83,7 @@ def test_upload_edits_files_without_modlist(base_config: Path, mission_dir: Path
         base_config_file=base_config, target_folder=mission_dir
     )
     # When Zeus calls "/zeus-upload"
-    out_path = config_gen.zeus_upload(
-        scenario_id=scenario_id, filename=filename, modlist=None
-    )
+    out_path = config_gen.zeus_upload(filename, scenario_id, modlist=None)
     # Then a new server config file is created
     assert out_path.is_file(), "Should have generated a file on disk"
     # And the config file is patched with just <scenarioId>
@@ -92,3 +91,40 @@ def test_upload_edits_files_without_modlist(base_config: Path, mission_dir: Path
     assert config["game"]["scenarioId"] == scenario_id, "Should update scenarioId"
     assert isinstance(config["game"]["mods"], list)
     assert config["game"]["mods"] == BASE_CONFIG["game"]["mods"], "Should keep modlist"
+
+
+def test_upload_existing_filename_without_scenarioid(
+    base_config: Path, mission_dir: Path
+):
+    """Scenario: Update modlist of an existing mission"""
+    # Given a Zeusops mission uploaded previously
+    scenario_id = "cool-scenario-1"
+    filename = "Jib_20250228"
+    config_gen = ReforgerConfigGenerator(
+        base_config_file=base_config, target_folder=mission_dir
+    )
+    # When Zeus calls "/zeus-upload"
+    modlist = MODLIST_DICTS[0:-1]
+    out_path = config_gen.zeus_upload(filename, scenario_id, modlist)
+    # When Zeus calls "/zeus-upload" with an existing filename
+    # And Zeus specifies <modlist.json>
+    out_path = config_gen.zeus_upload(filename, scenario_id=None, modlist=MODLIST_DICTS)
+    # Then the scenario ID is deduced automatically from the existing config
+    config = json.loads(out_path.read_text())
+    assert config["game"]["scenarioId"] == scenario_id, "Should use existing scenarioId"
+    # And the existing config is updated with the new mods.
+    assert isinstance(config["game"]["mods"], list)
+    assert config["game"]["mods"] == MODLIST_DICTS, "Should update modlist"
+
+
+def test_upload_no_scenarioid_without_file_fails(base_config: Path, mission_dir: Path):
+    """Scenario: Not providing a scenario ID for a new mission produces an error"""
+    # When Zeus calls "/zeus-upload" with a new filename
+    # And Zeus does not specify <scenarioId>
+    filename = "Jib_20250228"
+    config_gen = ReforgerConfigGenerator(
+        base_config_file=base_config, target_folder=mission_dir
+    )
+    # Then an error about a missing mission is raised.
+    with pytest.raises(ConfigFileNotFound):
+        config_gen.zeus_upload(filename, scenario_id=None, modlist=MODLIST_DICTS)
